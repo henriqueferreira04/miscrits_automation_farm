@@ -1,6 +1,5 @@
 
 import capture
-import click_spot  # Import the bush-clicking module
 import attack
 import close_fight
 import capture_action
@@ -48,7 +47,7 @@ if __name__ == '__main__':
                         attack.perform_attack(attack.strong_attack)
                     elif capture_result == 2:
                         print("🟢⚔️ Capturable item detected! Proceeding with basic attack...")
-                        attack.perform_attack(attack.basic_attack)
+                        attack.perform_attack(attack.third_attack)
                 else:
                     break
             

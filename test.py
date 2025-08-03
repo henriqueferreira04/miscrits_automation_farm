@@ -4,101 +4,124 @@ import numpy as np
 import mss
 import pyautogui
 
-def find_and_click_object(reference_image_path, confidence_threshold=0.8, target_monitor=1):
+def find_and_click_object_multiscale(reference_image_path, confidence_threshold=0.8, target_monitor=1):
     """
-    Captures the screen, finds a reference object, handles resolution scaling
-    for high-DPI displays, and clicks on the object.
+    Finds an object using template matching across multiple scales to handle
+    display scaling issues (e.g., on Retina/High-DPI screens).
     """
     try:
         # 1. Load the reference image (template)
-        reference_img = cv2.imread(reference_image_path, cv2.IMREAD_GRAYSCALE)
-        if reference_img is None:
+        reference_img_color = cv2.imread(reference_image_path, cv2.IMREAD_UNCHANGED)
+        if reference_img_color is None:
             print(f"Error: Could not load reference image at {reference_image_path}")
-            return
-        # Get the width and height of the template image
-        w, h = reference_img.shape[::-1]
+            return False
+
+        # --- Get base properties from the original reference image ---
+        if reference_img_color.shape[2] == 4:
+            reference_gray_orig = cv2.cvtColor(reference_img_color, cv2.COLOR_BGRA2GRAY)
+            _, mask_orig = cv2.threshold(reference_img_color[:, :, 3], 1, 255, cv2.THRESH_BINARY)
+        else:
+            reference_gray_orig = cv2.cvtColor(reference_img_color, cv2.COLOR_BGR2GRAY)
+            mask_orig = None
 
         with mss.mss() as sct:
-            # 2. Get screen information
-            monitors = sct.monitors
-            if not 0 < target_monitor < len(monitors):
-                print(f"Error: Monitor {target_monitor} is not available. Available monitors: {len(monitors)-1}")
-                return
+            # 2. Get screen and system scaling information
+            monitor_physical = sct.monitors[target_monitor]
+            logical_screen_width, _ = pyautogui.size()
+            system_scale_factor = monitor_physical['width'] / logical_screen_width
+            print(f"System-wide display scale factor detected: {system_scale_factor:.2f}x")
 
-            # This is the monitor with PHYSICAL pixel dimensions (e.g., 2560x1600)
-            monitor_physical = monitors[target_monitor]
-
-            # Get the LOGICAL screen size that PyAutoGUI uses (e.g., 1280x800)
-            logical_screen_width, logical_screen_height = pyautogui.size()
-
-            # 3. Calculate the scaling factor
-            # This is the key step for high-DPI displays
-            scale_factor = monitor_physical['width'] / logical_screen_width
-            print(f"Physical monitor resolution: {monitor_physical['width']}x{monitor_physical['height']}")
-            print(f"Logical (PyAutoGUI) resolution: {logical_screen_width}x{logical_screen_height}")
-            print(f"Detected display scale factor: {scale_factor}")
-
-            # 4. Capture the screen
+            # 3. Capture the screen just once
             sct_img = sct.grab(monitor_physical)
+            screen_capture_color = np.array(sct_img)
+            screen_gray = cv2.cvtColor(screen_capture_color, cv2.COLOR_BGRA2GRAY)
+
+            # 4. Multi-scale matching loop
+            best_match = {'score': -1, 'location': None, 'scale': 1.0, 'size': (0,0)}
             
-            # Convert to a format that OpenCV can use
-            screen_capture = np.array(sct_img)
-            screen_gray = cv2.cvtColor(screen_capture, cv2.COLOR_BGRA2GRAY)
+            # Define scales to check. Start with the detected system scale.
+            # Then check scales around it in case of minor variations.
+            scales_to_check = [system_scale_factor, 1.0, 0.9, 1.1, 0.8, 1.2, 2.0] # Add 2.0 for retina
+            scales_to_check = sorted(list(set(scales_to_check)), reverse=True) # Remove duplicates and sort
 
-            # 5. Find the object using template matching
-            result = cv2.matchTemplate(screen_gray, reference_img, cv2.TM_CCOEFF_NORMED)
-            _, max_val, _, max_loc = cv2.minMaxLoc(result)
+            print(f"Now searching on scales: {scales_to_check}")
 
-            print(f"Searching for object... Max confidence found: {max_val:.2f}")
-
-            if max_val >= confidence_threshold:
-                # 'max_loc' is the top-left corner in PHYSICAL pixels (e.g., within 2560x1600)
-                top_left_physical = max_loc
+            for scale in scales_to_check:
+                # Resize reference image and its mask
+                w = int(reference_gray_orig.shape[1] * scale)
+                h = int(reference_gray_orig.shape[0] * scale)
                 
-                # Calculate the center of the object in PHYSICAL pixels
+                # Prevent resizing to 0x0
+                if w == 0 or h == 0:
+                    continue
+
+                resized_ref = cv2.resize(reference_gray_orig, (w, h), interpolation=cv2.INTER_AREA)
+                resized_mask = cv2.resize(mask_orig, (w, h), interpolation=cv2.INTER_NEAREST) if mask_orig is not None else None
+                
+                # Don't search if the template is now bigger than the screen
+                if resized_ref.shape[0] > screen_gray.shape[0] or resized_ref.shape[1] > screen_gray.shape[1]:
+                    continue
+
+                result = cv2.matchTemplate(screen_gray, resized_ref, cv2.TM_CCOEFF_NORMED, mask=resized_mask)
+                _, max_val, _, max_loc = cv2.minMaxLoc(result)
+                
+                # print(f"  - Scale {scale:.2f}: Max confidence = {max_val:.3f}") # Uncomment for deep debugging
+
+                # If this scale gives a better score, store all its info
+                if max_val > best_match['score']:
+                    best_match['score'] = max_val
+                    best_match['location'] = max_loc
+                    best_match['scale'] = scale
+                    best_match['size'] = (w, h)
+
+            # 5. After checking all scales, evaluate the single best match found
+            print(f"\nOverall Best Match Found -> Score: {best_match['score']:.3f} at Scale: {best_match['scale']:.2f}")
+
+            if best_match['score'] >= confidence_threshold:
+                print("Object FOUND!")
+                
+                top_left_physical = best_match['location']
+                w, h = best_match['size']
                 center_x_physical = top_left_physical[0] + w // 2
                 center_y_physical = top_left_physical[1] + h // 2
 
-                # --- FIX: Convert PHYSICAL coordinates to LOGICAL coordinates ---
-                center_x_logical = center_x_physical / 2
-                center_y_logical = center_y_physical / 2
-                # --- END FIX ---
+                # Convert to LOGICAL coordinates for click
+                center_x_logical = center_x_physical / system_scale_factor
+                center_y_logical = center_y_physical / system_scale_factor
                 
-                print(f"\nObject FOUND!")
-                print(f"  > Physical Location (in screenshot): ({center_x_physical}, {center_y_physical})")
-                print(f"  > Logical Location (for click): ({int(center_x_logical)}, {int(center_y_logical)})")
+                print(f"  > Click position (logical): ({int(center_x_logical)}, {int(center_y_logical)})")
 
-                # 6. Perform the click using the corrected LOGICAL coordinates
-                pyautogui.moveTo(center_x_logical, center_y_logical, duration=0.25)
+                pyautogui.moveTo(center_x_logical, center_y_logical, duration=0.2)
                 pyautogui.click()
-                print("Clicked on the object.")
-
-                # --- Visualization (Optional) ---
-                # Draw a rectangle on the captured image for visual confirmation
+                
+                # Visualization
                 bottom_right_physical = (top_left_physical[0] + w, top_left_physical[1] + h)
-                # We need to convert the BGR-A screenshot to BGR for drawing
-                screen_display = cv2.cvtColor(screen_capture, cv2.COLOR_BGRA2BGR)
-                cv2.rectangle(screen_display, top_left_physical, bottom_right_physical, (0, 255, 0), 3)
-                cv2.imshow('Result - Object Found', screen_display)
-                cv2.waitKey(2000) # Display for 2 seconds
-
+                screen_display = cv2.cvtColor(screen_capture_color, cv2.COLOR_BGRA2BGR)
+                cv2.rectangle(screen_display, top_left_physical, bottom_right_physical, (0, 255, 0), 2)
+                cv2.imshow('Result - Found', screen_display)
+                cv2.waitKey(1000)
+                return True
             else:
-                print("Object not found on screen.")
+                print("Object not found on screen at any tested scale.")
+                return False
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        return False
     finally:
-        # Ensure all OpenCV windows are closed
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    print("Starting in 3 seconds. Please switch to your target window.")
+    print("Starting in 3 seconds...")
     time.sleep(3)
     
-    # Define the path to your reference image
-    REFERENCE_IMAGE_PATH = 'images/foil_vhisp.png' 
+    REFERENCE_IMAGE_PATH = 'images/cadbunny.png'
     
-    # Run the function with a confidence threshold
-    # You may need to lower this if the object isn't found
-    find_and_click_object(REFERENCE_IMAGE_PATH, confidence_threshold=0.7)
+    # Using the new multi-scale function
+    was_found = find_and_click_object_multiscale(REFERENCE_IMAGE_PATH, confidence_threshold=0.4)
+
+    if was_found:
+        print("\nSuccessfully found and clicked the object.")
+    else:
+        print("\nCould not find the object.")

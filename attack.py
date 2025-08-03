@@ -36,6 +36,7 @@ def find_coordinates():
 
 strong_attack = [564, 1020]
 basic_attack = [1334, 1020]
+third_attack = [1093, 1003]
 def perform_attack(attack_coordinates):
     """
     Moves to the specified coordinates and performs a realistic click.

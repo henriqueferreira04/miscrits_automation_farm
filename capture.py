@@ -9,7 +9,21 @@ miscrits_dict_rarity = {
     "Charix": "Rare",
     "Alpha": "Exotic",
     "Dark Steamguin": "Rare",
-    "Dark Squibee": "Rare"
+    "Dark Squibee": "Rare",
+    "Frostmite": "Common",
+    "Mistraxol": "Common",
+    "Orbling": "Common",
+    "Zappup": "Common",
+    "Dark Kiloray": "Rare",
+    "Dark Arigato": "Rare",
+    "Owlie": "Common",
+    "Arla": "Common",
+    "Sparkslug": "Common",
+    "Craggy": "Common",
+    "Eggy": "Rare",
+    "Felis": "Common",
+    "Auger": "Common",
+    "Foil Vhisp": "Exotic",
 }
 
 rarity_percentages = {
@@ -18,7 +32,7 @@ rarity_percentages = {
     "Exotic": [0]
 }
 
-exception_miscrits = ["Aebex"]
+exception_miscrits = ["Aebex", "Frostmite"]
 
 
 
