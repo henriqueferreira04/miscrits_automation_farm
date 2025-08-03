@@ -1,11 +1,12 @@
 
 import capture
-import click_bush  # Import the bush-clicking module
+import click_spot  # Import the bush-clicking module
 import attack
 import close_fight
 import capture_action
 import detect_redspeed
 import exit_fight
+import find_spot
 import heal_miscrit
 import health_percentage_detector
 import ocr_analyser
@@ -14,8 +15,9 @@ import ocr_analyser
 # --- Main execution block ---
 if __name__ == '__main__':
     while True:
-        click_bush.run_spot_clicker()  # Run the bush-clicking function
-        
+        REFERENCE_IMAGE_PATH = 'images/foil_vhisp.png' 
+        find_spot.run_spot_clicker(REFERENCE_IMAGE_PATH)
+
         while True:
             text = ocr_analyser.run_automated_ocr_easyocr()
 

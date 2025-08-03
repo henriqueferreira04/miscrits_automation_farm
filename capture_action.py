@@ -157,3 +157,6 @@ def capture_miscrit():
     okay_action()
     time.sleep(6)  # Wait for the okay action to complete
 
+
+if __name__ == "__main__":
+    find_coordinates()  # Uncomment to find coordinates

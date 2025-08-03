@@ -79,8 +79,3 @@ def run_automated_ocr_easyocr(horizontal_start_percent=50, horizontal_end_percen
     '''
     
     return final_text
-
-
-
-        
-    

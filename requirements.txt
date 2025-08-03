@@ -1,0 +1,17 @@
+# Requirements file for Miscrits Automation Farm
+# This file contains all the Python packages needed to run run.py
+
+# GUI automation library for clicking and screen capture
+pyautogui>=0.9.54
+
+# OCR (Optical Character Recognition) library for text detection
+easyocr>=1.7.0
+
+# Numerical computing library (required by OpenCV and EasyOCR)
+numpy>=1.24.0
+
+# Computer vision library for image processing
+opencv-python>=4.8.0
+
+# Python Imaging Library for image manipulation
+Pillow>=10.0.0
