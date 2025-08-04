@@ -3,113 +3,152 @@ import numpy as np
 import pyautogui
 import time
 import random
+import ocr_analyser  # Assuming this is a custom module for OCR analysis
 
-def get_contours_from_image(input_image):
+
+def find_best_match_on_screen(reference_image_path, confidence_threshold=0.7):
     """
-    Streamlined pipeline to take a BGR image and return its contours.
-    This version does not show intermediate steps.
+    Finds the best match for a reference image on the screen using a robust
+    multi-scale template matching approach with an alpha channel mask.
+
+    Args:
+        reference_image_path (str): The path to the reference PNG with transparency.
+        confidence_threshold (float): The minimum score (0.0 to 1.0) to consider a match.
+
+    Returns:
+        dict: A dictionary with match details ('location', 'score', etc.) or None if not found.
     """
-    if input_image is None or input_image.size == 0:
-        return []
+    # 1. Load the reference image, preserving the alpha (transparency) channel
+    ref_rgba = cv2.imread(reference_image_path, cv2.IMREAD_UNCHANGED)
+    if ref_rgba is None:
+        print(f"FATAL ERROR: Could not open reference image at '{reference_image_path}'")
+        return None
 
-    # Pipeline: Grayscale -> Blur -> Canny -> Dilate -> Find Contours
-    grayscale_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
-    blurred_image = cv2.GaussianBlur(grayscale_image, (3, 3), 0)
-    canny_edges = cv2.Canny(blurred_image, 50, 150)
-    kernel = np.ones((3, 3), np.uint8) # Use a slightly larger kernel for better connection
-    dilated_edges = cv2.dilate(canny_edges, kernel, iterations=2)
-    
-    contours, _ = cv2.findContours(dilated_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    return contours
+    # Separate the BGR channels (the template) and the Alpha channel (the mask)
+    template = ref_rgba[:, :, :3]
+    mask = ref_rgba[:, :, 3]
 
-
-if __name__ == "__main__":
-    # ==========================================================
-    # PART 1: PROCESS THE REFERENCE IMAGE
-    # ==========================================================
-    REFERENCE_IMAGE_PATH = 'images/foil_vhisp.png' # Make sure this path is correct
-    reference_rgba = cv2.imread(REFERENCE_IMAGE_PATH, cv2.IMREAD_UNCHANGED)
-
-    if reference_rgba is None:
-        print(f"FATAL ERROR: Could not open reference image at '{REFERENCE_IMAGE_PATH}'")
-        exit()
-
-    # Isolate the object using its alpha channel
-    alpha_channel = reference_rgba[:, :, 3]
-    reference_bgr = reference_rgba[:, :, :3]
-    black_background = np.zeros_like(reference_bgr)
-    isolated_bgr = np.where(alpha_channel[..., None] > 0, reference_bgr, black_background)
-
-    # Get the contours from our perfectly isolated reference object
-    ref_contours = get_contours_from_image(isolated_bgr)
-
-    if not ref_contours:
-        print("FATAL ERROR: No contours found in the reference image. Check the image and pipeline settings.")
-        exit()
-
-    # Combine all reference contours into a single one for matching
-    # This creates a master shape of the entire object
-    master_ref_contour = np.vstack([c for c in ref_contours])
-    print(f"Reference image processed successfully. Found {len(ref_contours)} parts and combined them into one master shape.")
-
-    # ==========================================================
-    # PART 2: PROCESS THE SCREEN AND MATCH
-    # ==========================================================
-    print("\nStarting screen capture and matching in 3 seconds...")
-    time.sleep(3)
-    
+    # 2. Capture the screen just once
+    print("Capturing screen...")
     screenshot_pil = pyautogui.screenshot()
     screen_bgr = cv2.cvtColor(np.array(screenshot_pil), cv2.COLOR_RGB2BGR)
-
-    # Get all contours from the live screen capture
-    print("Processing screen to find all contours...")
-    screen_contours = get_contours_from_image(screen_bgr)
-    print(f"Found {len(screen_contours)} potential contours on the screen.")
-
-    # ==========================================================
-    # PART 3: FIND THE BEST MATCH
-    # ==========================================================
-    print("\nComparing reference shape to all screen shapes...")
     
-    best_match_score = float('inf')  # Start with an infinitely bad score
-    best_match_contour = None
+    # 3. Perform Multi-Scale Matching
+    best_match = {'score': -1, 'location': None, 'scale': 1.0, 'size': (0, 0)}
     
-    # Loop through every contour found on the screen
-    for screen_contour in screen_contours:
-        # Compare the screen contour to our master reference contour
-        # cv2.CONTOURS_MATCH_I1 is one of the most reliable matching methods
-        match_score = cv2.matchShapes(master_ref_contour, screen_contour, cv2.CONTOURS_MATCH_I1, 0.0)
-        
-        # If this contour is a better match than any we've seen before, store it
-        if match_score < best_match_score:
-            best_match_score = match_score
-            best_match_contour = screen_contour
-
-    # ==========================================================
-    # PART 4: VISUALIZE THE FINAL RESULT
-    # ==========================================================
+    # Define a range of scales to check. This makes the search flexible.
+    # From 50% size up to 150% size, in steps of 10%.
+    scales_to_check = np.linspace(0.5, 1.5, 11)
     
-    # Define a threshold for what you consider a "good" match.
-    # This value requires tuning! Lower is stricter. Start with 0.5.
-    MATCH_THRESHOLD = 0.5 
+    print(f"Now searching on {len(scales_to_check)} different scales...")
 
-    if best_match_contour is not None and best_match_score < MATCH_THRESHOLD:
-        print(f"\nSUCCESS! Found a good match.")
-        print(f"  -> Best match score: {best_match_score:.4f} (lower is better)")
+    for scale in scales_to_check:
+        # Resize the template and its mask according to the current scale
+        w = int(template.shape[1] * scale)
+        h = int(template.shape[0] * scale)
         
-        # Get the bounding box of the best matching contour
-        x, y, w, h = cv2.boundingRect(best_match_contour)
-        
-        # Draw a red rectangle around the found object on the original screenshot
-        cv2.rectangle(screen_bgr, (x, y), (x + w, y + h), (0, 0, 255), 3)
-        
-        # Put the score text on the image
-        text = f"Match Score: {best_match_score:.2f}"
-        cv2.putText(screen_bgr, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        if w == 0 or h == 0 or w > screen_bgr.shape[1] or h > screen_bgr.shape[0]:
+            continue
 
-        coor_x = x + w // 2
-        coor_y = y + h // 2
+        resized_template = cv2.resize(template, (w, h), interpolation=cv2.INTER_AREA)
+        resized_mask = cv2.resize(mask, (w, h), interpolation=cv2.INTER_AREA)
+
+        # Perform template matching
+        result = cv2.matchTemplate(screen_bgr, resized_template, cv2.TM_CCOEFF_NORMED, mask=resized_mask)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+        
+        # If this scale gives a better score than any we've seen before, store it
+        if max_val > best_match['score']:
+            best_match['score'] = max_val
+            best_match['location'] = max_loc
+            best_match['scale'] = scale
+            best_match['size'] = (w, h)
+
+    # 4. Evaluate the single best match found across all scales
+    print(f"\nSearch complete. Overall Best Match -> Score: {best_match['score']:.3f} at Scale: {best_match['scale']:.2f}x")
+
+    if best_match['score'] >= confidence_threshold:
+        print(f"SUCCESS! Match found with confidence above the threshold of {confidence_threshold}.")
+        return best_match
+    else:
+        print("FAILURE: A match was found, but its confidence score is too low.")
+        return None
+
+
+def get_clear_view_action():
+    coor_x = 921
+    coor_y = 305
+    print(f"Moving to clear view action coordinates: ({coor_x}, {coor_y})")
+
+    # Move the mouse to the target with a human-like, random duration
+    pyautogui.moveTo(
+        coor_x,
+        coor_y,
+        duration=random.uniform(0.1, 0.3),
+        tween=pyautogui.easeOutQuad
+    )
+
+    # Perform a realistic click
+    print("Clicking clear view action button...")
+    pyautogui.mouseDown()
+    time.sleep(random.uniform(0.06, 0.16)) # Hold the click briefly
+    pyautogui.mouseUp()
+
+    print("✅ Clear view action complete.")
+
+
+
+def run_spot_clicker(image_path):
+    time.sleep(3)
+    
+    # Define the path to your reference image
+    CLICK_DELAY = 3.0
+
+    count = 0
+    while True:
+        print(f"\nSearching for '{image_path}' in the designated area...")
+
+        # Call the function, passing the newly calculated search region
+        was_successful = find_and_click_object_multiscale(image_path, confidence_threshold=0.7)
+
+        if was_successful:
+            print(f"Action successful. Waiting for {CLICK_DELAY} seconds...")
+            time.sleep(CLICK_DELAY)
+        else:
+            count += 1
+            if count > 10:
+                get_clear_view_action()
+                count = 0
+            text = ocr_analyser.run_automated_ocr_easyocr()
+            print("*"*40)
+            print(text)
+            if "%" in text:
+                break
+    
+
+
+def find_and_click_object_multiscale(reference_image_path, confidence_threshold=0.7):
+    
+    REFERENCE_IMAGE_PATH = reference_image_path  # <--- Make sure this path is correct
+    CONFIDENCE_THRESHOLD = confidence_threshold  # <--- YOU CAN TUNE THIS VALUE
+
+    print("Starting finder in 3 seconds...")
+    time.sleep(3)
+    
+    # Run the robust finder
+    found_object = find_best_match_on_screen(REFERENCE_IMAGE_PATH, CONFIDENCE_THRESHOLD)
+
+    # Visualize the result
+    screenshot_bgr = cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR)
+
+    if found_object:
+        top_left = found_object['location']
+        w, h = found_object['size']
+        bottom_right = (top_left[0] + w, top_left[1] + h)
+
+        coor_x = top_left[0] + w // 2
+        coor_y = top_left[1] + h // 2
+
         pyautogui.moveTo(
             coor_x,
             coor_y,
@@ -118,17 +157,49 @@ if __name__ == "__main__":
         )
         
         # Perform a realistic click
-        print("Clicking capture button...")
+        print("Clicking spot button...")
         pyautogui.mouseDown()
         time.sleep(random.uniform(0.06, 0.16)) # Hold the click briefly
         pyautogui.mouseUp()
         
+        '''
+        # Draw a bright green rectangle around the found object
+        cv2.rectangle(screenshot_bgr, top_left, bottom_right, (0, 255, 0), 3)
+        
+        # Put the score and scale text on the image
+        score_text = f"Score: {found_object['score']:.2f}"
+        scale_text = f"Scale: {found_object['scale']:.2f}x"
+        cv2.putText(screenshot_bgr, score_text, (top_left[0], top_left[1] - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        cv2.putText(screenshot_bgr, scale_text, (top_left[0], top_left[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        '''
+        
     else:
-        print(f"\nFAILURE: No suitable match found on screen.")
-        print(f"  -> The best score found was {best_match_score:.4f}, which is above the threshold of {MATCH_THRESHOLD}.")
+        '''
+        fail_text = "Object Not Found"
+        text_size, _ = cv2.getTextSize(fail_text, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)
+        screen_h, screen_w, _ = screenshot_bgr.shape
+        text_x = (screen_w - text_size[0]) // 2
+        text_y = (screen_h + text_size[1]) // 2
+        cv2.putText(screenshot_bgr, fail_text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        '''
+        print("Object Not Found")
+        return False
 
-    # Display the final image
-    cv2.imshow("Final Result", screen_bgr)
+    '''
+    # Display the final result
+    cv2.imshow("Final Result", screenshot_bgr)
     print("\nDisplaying the final result. Press any key to exit.")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    '''
+    return True
+
+
+if __name__ == "__main__":
+    REFERENCE_IMAGE_PATH = 'images/octavio.png'  # <--- Make sure this path is correct
+    CONFIDENCE_THRESHOLD = 0.7  # <--- YOU CAN TUNE THIS VALUE
+
+    print("Starting finder in 3 seconds...")
+    time.sleep(3)
+
+    run_spot_clicker(REFERENCE_IMAGE_PATH)

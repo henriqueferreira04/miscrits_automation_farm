@@ -73,7 +73,7 @@ def find_best_match_on_screen(reference_image_path, confidence_threshold=0.7):
 
 
 if __name__ == "__main__":
-    REFERENCE_IMAGE_PATH = 'images/cadbunny.png'  # <--- Make sure this path is correct
+    REFERENCE_IMAGE_PATH = 'images/octavio.png'  # <--- Make sure this path is correct
     CONFIDENCE_THRESHOLD = 0.7  # <--- YOU CAN TUNE THIS VALUE
 
     print("Starting finder in 3 seconds...")

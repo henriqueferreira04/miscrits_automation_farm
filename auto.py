@@ -14,7 +14,7 @@ import ocr_analyser
 # --- Main execution block ---
 if __name__ == '__main__':
     while True:
-        REFERENCE_IMAGE_PATH = 'images/foil_vhisp.png' 
+        REFERENCE_IMAGE_PATH = 'images/octavio.png' 
         find_spot.run_spot_clicker(REFERENCE_IMAGE_PATH)
 
         while True:
