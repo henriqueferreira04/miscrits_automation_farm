@@ -1,127 +1,114 @@
-import time
 import cv2
 import numpy as np
-import mss
 import pyautogui
+import time
 
-def find_and_click_object_multiscale(reference_image_path, confidence_threshold=0.8, target_monitor=1):
+def find_best_match_on_screen(reference_image_path, confidence_threshold=0.7):
     """
-    Finds an object using template matching across multiple scales to handle
-    display scaling issues (e.g., on Retina/High-DPI screens).
+    Finds the best match for a reference image on the screen using a robust
+    multi-scale template matching approach with an alpha channel mask.
+
+    Args:
+        reference_image_path (str): The path to the reference PNG with transparency.
+        confidence_threshold (float): The minimum score (0.0 to 1.0) to consider a match.
+
+    Returns:
+        dict: A dictionary with match details ('location', 'score', etc.) or None if not found.
     """
-    try:
-        # 1. Load the reference image (template)
-        reference_img_color = cv2.imread(reference_image_path, cv2.IMREAD_UNCHANGED)
-        if reference_img_color is None:
-            print(f"Error: Could not load reference image at {reference_image_path}")
-            return False
+    # 1. Load the reference image, preserving the alpha (transparency) channel
+    ref_rgba = cv2.imread(reference_image_path, cv2.IMREAD_UNCHANGED)
+    if ref_rgba is None:
+        print(f"FATAL ERROR: Could not open reference image at '{reference_image_path}'")
+        return None
 
-        # --- Get base properties from the original reference image ---
-        if reference_img_color.shape[2] == 4:
-            reference_gray_orig = cv2.cvtColor(reference_img_color, cv2.COLOR_BGRA2GRAY)
-            _, mask_orig = cv2.threshold(reference_img_color[:, :, 3], 1, 255, cv2.THRESH_BINARY)
-        else:
-            reference_gray_orig = cv2.cvtColor(reference_img_color, cv2.COLOR_BGR2GRAY)
-            mask_orig = None
+    # Separate the BGR channels (the template) and the Alpha channel (the mask)
+    template = ref_rgba[:, :, :3]
+    mask = ref_rgba[:, :, 3]
 
-        with mss.mss() as sct:
-            # 2. Get screen and system scaling information
-            monitor_physical = sct.monitors[target_monitor]
-            logical_screen_width, _ = pyautogui.size()
-            system_scale_factor = monitor_physical['width'] / logical_screen_width
-            print(f"System-wide display scale factor detected: {system_scale_factor:.2f}x")
+    # 2. Capture the screen just once
+    print("Capturing screen...")
+    screenshot_pil = pyautogui.screenshot()
+    screen_bgr = cv2.cvtColor(np.array(screenshot_pil), cv2.COLOR_RGB2BGR)
+    
+    # 3. Perform Multi-Scale Matching
+    best_match = {'score': -1, 'location': None, 'scale': 1.0, 'size': (0, 0)}
+    
+    # Define a range of scales to check. This makes the search flexible.
+    # From 50% size up to 150% size, in steps of 10%.
+    scales_to_check = np.linspace(0.5, 1.5, 11)
+    
+    print(f"Now searching on {len(scales_to_check)} different scales...")
 
-            # 3. Capture the screen just once
-            sct_img = sct.grab(monitor_physical)
-            screen_capture_color = np.array(sct_img)
-            screen_gray = cv2.cvtColor(screen_capture_color, cv2.COLOR_BGRA2GRAY)
+    for scale in scales_to_check:
+        # Resize the template and its mask according to the current scale
+        w = int(template.shape[1] * scale)
+        h = int(template.shape[0] * scale)
+        
+        if w == 0 or h == 0 or w > screen_bgr.shape[1] or h > screen_bgr.shape[0]:
+            continue
 
-            # 4. Multi-scale matching loop
-            best_match = {'score': -1, 'location': None, 'scale': 1.0, 'size': (0,0)}
-            
-            # Define scales to check. Start with the detected system scale.
-            # Then check scales around it in case of minor variations.
-            scales_to_check = [system_scale_factor, 1.0, 0.9, 1.1, 0.8, 1.2, 2.0] # Add 2.0 for retina
-            scales_to_check = sorted(list(set(scales_to_check)), reverse=True) # Remove duplicates and sort
+        resized_template = cv2.resize(template, (w, h), interpolation=cv2.INTER_AREA)
+        resized_mask = cv2.resize(mask, (w, h), interpolation=cv2.INTER_AREA)
 
-            print(f"Now searching on scales: {scales_to_check}")
+        # Perform template matching
+        result = cv2.matchTemplate(screen_bgr, resized_template, cv2.TM_CCOEFF_NORMED, mask=resized_mask)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+        
+        # If this scale gives a better score than any we've seen before, store it
+        if max_val > best_match['score']:
+            best_match['score'] = max_val
+            best_match['location'] = max_loc
+            best_match['scale'] = scale
+            best_match['size'] = (w, h)
 
-            for scale in scales_to_check:
-                # Resize reference image and its mask
-                w = int(reference_gray_orig.shape[1] * scale)
-                h = int(reference_gray_orig.shape[0] * scale)
-                
-                # Prevent resizing to 0x0
-                if w == 0 or h == 0:
-                    continue
+    # 4. Evaluate the single best match found across all scales
+    print(f"\nSearch complete. Overall Best Match -> Score: {best_match['score']:.3f} at Scale: {best_match['scale']:.2f}x")
 
-                resized_ref = cv2.resize(reference_gray_orig, (w, h), interpolation=cv2.INTER_AREA)
-                resized_mask = cv2.resize(mask_orig, (w, h), interpolation=cv2.INTER_NEAREST) if mask_orig is not None else None
-                
-                # Don't search if the template is now bigger than the screen
-                if resized_ref.shape[0] > screen_gray.shape[0] or resized_ref.shape[1] > screen_gray.shape[1]:
-                    continue
-
-                result = cv2.matchTemplate(screen_gray, resized_ref, cv2.TM_CCOEFF_NORMED, mask=resized_mask)
-                _, max_val, _, max_loc = cv2.minMaxLoc(result)
-                
-                # print(f"  - Scale {scale:.2f}: Max confidence = {max_val:.3f}") # Uncomment for deep debugging
-
-                # If this scale gives a better score, store all its info
-                if max_val > best_match['score']:
-                    best_match['score'] = max_val
-                    best_match['location'] = max_loc
-                    best_match['scale'] = scale
-                    best_match['size'] = (w, h)
-
-            # 5. After checking all scales, evaluate the single best match found
-            print(f"\nOverall Best Match Found -> Score: {best_match['score']:.3f} at Scale: {best_match['scale']:.2f}")
-
-            if best_match['score'] >= confidence_threshold:
-                print("Object FOUND!")
-                
-                top_left_physical = best_match['location']
-                w, h = best_match['size']
-                center_x_physical = top_left_physical[0] + w // 2
-                center_y_physical = top_left_physical[1] + h // 2
-
-                # Convert to LOGICAL coordinates for click
-                center_x_logical = center_x_physical / system_scale_factor
-                center_y_logical = center_y_physical / system_scale_factor
-                
-                print(f"  > Click position (logical): ({int(center_x_logical)}, {int(center_y_logical)})")
-
-                pyautogui.moveTo(center_x_logical, center_y_logical, duration=0.2)
-                pyautogui.click()
-                
-                # Visualization
-                bottom_right_physical = (top_left_physical[0] + w, top_left_physical[1] + h)
-                screen_display = cv2.cvtColor(screen_capture_color, cv2.COLOR_BGRA2BGR)
-                cv2.rectangle(screen_display, top_left_physical, bottom_right_physical, (0, 255, 0), 2)
-                cv2.imshow('Result - Found', screen_display)
-                cv2.waitKey(1000)
-                return True
-            else:
-                print("Object not found on screen at any tested scale.")
-                return False
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
-    finally:
-        cv2.destroyAllWindows()
+    if best_match['score'] >= confidence_threshold:
+        print(f"SUCCESS! Match found with confidence above the threshold of {confidence_threshold}.")
+        return best_match
+    else:
+        print("FAILURE: A match was found, but its confidence score is too low.")
+        return None
 
 
 if __name__ == "__main__":
-    print("Starting in 3 seconds...")
+    REFERENCE_IMAGE_PATH = 'images/cadbunny.png'  # <--- Make sure this path is correct
+    CONFIDENCE_THRESHOLD = 0.7  # <--- YOU CAN TUNE THIS VALUE
+
+    print("Starting finder in 3 seconds...")
     time.sleep(3)
     
-    REFERENCE_IMAGE_PATH = 'images/cadbunny.png'
-    
-    # Using the new multi-scale function
-    was_found = find_and_click_object_multiscale(REFERENCE_IMAGE_PATH, confidence_threshold=0.4)
+    # Run the robust finder
+    found_object = find_best_match_on_screen(REFERENCE_IMAGE_PATH, CONFIDENCE_THRESHOLD)
 
-    if was_found:
-        print("\nSuccessfully found and clicked the object.")
+    # Visualize the result
+    screenshot_bgr = cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR)
+
+    if found_object:
+        top_left = found_object['location']
+        w, h = found_object['size']
+        bottom_right = (top_left[0] + w, top_left[1] + h)
+        
+        # Draw a bright green rectangle around the found object
+        cv2.rectangle(screenshot_bgr, top_left, bottom_right, (0, 255, 0), 3)
+        
+        # Put the score and scale text on the image
+        score_text = f"Score: {found_object['score']:.2f}"
+        scale_text = f"Scale: {found_object['scale']:.2f}x"
+        cv2.putText(screenshot_bgr, score_text, (top_left[0], top_left[1] - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        cv2.putText(screenshot_bgr, scale_text, (top_left[0], top_left[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
     else:
-        print("\nCould not find the object.")
+        fail_text = "Object Not Found"
+        text_size, _ = cv2.getTextSize(fail_text, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)
+        screen_h, screen_w, _ = screenshot_bgr.shape
+        text_x = (screen_w - text_size[0]) // 2
+        text_y = (screen_h + text_size[1]) // 2
+        cv2.putText(screenshot_bgr, fail_text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    # Display the final result
+    cv2.imshow("Final Result", screenshot_bgr)
+    print("\nDisplaying the final result. Press any key to exit.")
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
