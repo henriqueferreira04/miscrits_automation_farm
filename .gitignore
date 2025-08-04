@@ -123,5 +123,8 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
+__pycache__/
+
 # Project specific
 # Add any project-specific files or folders you want to ignore belowvenv/
+venv/
