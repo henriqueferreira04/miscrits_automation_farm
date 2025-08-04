@@ -56,7 +56,8 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
 
 # --- Main part of the script ---
 def run_spot_clicker():
-    SPOT_IMAGE = 'images/alpha.png'
+    
+    SPOT_IMAGES = ['images/cadbunny.png', 'images/cadbunny3.png', 'images/cadbunny2.png']
     CLICK_DELAY = 3.0
 
     print("Starting the bot...")
@@ -83,11 +84,15 @@ def run_spot_clicker():
 
     count = 0
     while True:
-        print(f"\nSearching for '{SPOT_IMAGE}' in the designated area...")
-        
-        # Call the function, passing the newly calculated search region
-        was_successful = find_and_click_spot(SPOT_IMAGE, search_region, confidence_level=0.8)
-        
+        print(f"\nSearching for '{SPOT_IMAGES}' in the designated area...")
+
+        for SPOT_IMAGE in SPOT_IMAGES:
+            # Call the function, passing the newly calculated search region
+            was_successful = find_and_click_spot(SPOT_IMAGE, search_region, confidence_level=0.8)
+
+            if was_successful:
+                break
+
         if was_successful:
             print(f"Action successful. Waiting for {CLICK_DELAY} seconds...")
             time.sleep(CLICK_DELAY)

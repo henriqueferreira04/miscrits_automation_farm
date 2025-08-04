@@ -9,7 +9,14 @@ miscrits_dict_rarity = {
     "Charix": "Rare",
     "Alpha": "Exotic",
     "Dark Steamguin": "Rare",
-    "Dark Squibee": "Rare"
+    "Dark Squibee": "Rare",
+    "Frostmite": "Common",
+    "Dark Kiloray": "Rare",
+    "Cadbunny": "Exotic",
+    "Mistraxol": "Common",
+    "Orbling": "Common",
+    "Zappup": "Common",
+    "Dark Arigato": "Rare"
 }
 
 rarity_percentages = {
