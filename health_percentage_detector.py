@@ -29,7 +29,7 @@ DARK_RED_UPPER = np.array([50, 50, 180])   # Upper bound for a dark red
 # --- Detection Threshold ---
 # The number of "blood red" pixels that must be present to trigger the alarm.
 # TUNE THIS using the debug output. Start with a low number.
-MIN_DARK_RED_PIXEL_THRESHOLD = 200
+MIN_DARK_RED_PIXEL_THRESHOLD = 100
 
 # --- Debug Mode ---
 # ALWAYS use Debug Mode to set up and test your color range and threshold.
@@ -65,6 +65,8 @@ def is_health_critical():
 
         if dark_red_pixel_count>= MIN_DARK_RED_PIXEL_THRESHOLD:
             print(f"⚠️ Health is critical! Dark red pixel count: {dark_red_pixel_count}")
+        else:
+            print(f"✅ Health is not critical. Dark red pixel count: {dark_red_pixel_count}")
 
         # 6. Return True if the count exceeds our threshold
         return dark_red_pixel_count >= MIN_DARK_RED_PIXEL_THRESHOLD

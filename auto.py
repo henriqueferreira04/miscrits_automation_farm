@@ -11,6 +11,7 @@ import health_percentage_detector
 import ocr_analyser
 
 
+
 # --- Main execution block ---
 if __name__ == '__main__':
     while True:
