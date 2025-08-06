@@ -48,6 +48,7 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
             return False
             
     except pyautogui.ImageNotFoundException:
+        print(f"🟡 Image '{image_file}' not found in the specified region.")
         return False
         
     except Exception as e:
@@ -56,7 +57,7 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
 
 # --- Main part of the script ---
 def run_spot_clicker():
-    SPOT_IMAGES = ['images/dark_tulipinny.png', 'images/dark_tulipinny2.png']
+    SPOT_IMAGES = ['images/octavio.png', 'images/octavio2.png']
     CLICK_DELAY = 3.0
 
     print("Starting the bot...")

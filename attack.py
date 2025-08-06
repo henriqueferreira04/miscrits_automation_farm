@@ -34,8 +34,10 @@ def find_coordinates():
 #  STEP 2: PERFORM THE ATTACK
 # ==============================================================================
 
-strong_attack = [564, 1020]
-basic_attack = [1334, 1020]
+strong_attack = [564, 1020] #first attack button
+#basic_attack = [1334, 1020] #forth attack button
+basic_attack = [1004, 1020] #third attack button
+
 def perform_attack(attack_coordinates):
     """
     Moves to the specified coordinates and performs a realistic click.

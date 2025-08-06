@@ -2,9 +2,10 @@ import pyautogui
 import random
 import time
 from capture_action import confirm_action
-import ocr_analyser
+
 
 def heal_action():
+    time.sleep(2)  # Wait for the screen to stabilize before moving the mouse
     coor_x = 1200
     coor_y = 60
     print(f"Moving to heal action coordinates: ({coor_x}, {coor_y})")

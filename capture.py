@@ -18,21 +18,47 @@ miscrits_dict_rarity = {
     "Zappup": "Common",
     "Dark Arigato": "Rare",
     "Bubbles": "Common",
-    "Lavarilla": "Common",
+    "Lavarila": "Common",
     "Shellbee": "Common",
     "Elefauna": "Common",
     "Flameling": "Common",
     "Quirk": "Common",
     "Lil Bubs": "Rare",
-    "Dark Lavarilla": "Rare",
+    "Dark Lavarila": "Rare",
     "Dark Tulipinny": "Epic",
+    "Echino": "Common",
+    "Wavesling": "Common",
+    "Sparkitten": "Common",
+    "Arigato": "Common",
+    "Hippoke": "Common",
+    "Ignios": "Rare",
+    "Dark Sparkitten": "Rare",
+    "Pamboo": "Rare",
+    "Light Crickin": "Exotic",
+    "Dark Frostmite": "Rare",
+    "Freezet": "Common",
+    "Frozy": "Common",
+    "Dark Breezycheeks": "Rare",
+    "Wooly": "Legendary",
+    "Statikat": "Common",
+    "Equestrion": "Common",
+    "Drilldent": "Common",
+    "Kiloray": "Common",
+    "Breezycheeks": "Common",
+    "Mumbah": "Common",
+    "Octavio": "Epic",
+    "Opigum": "Rare",
+    "Luna": "Rare",
+    "Poltergust": "Rare",
+
 }
 
 rarity_percentages = {
     "Common": [27, 30, 31],
     "Rare": [17, 20, 21],
     "Exotic": [0],
-    "Epic": [0]
+    "Epic": [0],
+    "Legendary": [0],
 }
 
 exception_miscrits = ["Aebex"]
@@ -80,7 +106,8 @@ def is_to_capture(text):
 
 def capture_decision(percentage, rarity):
     if isinstance(percentage, int):
-        if rarity == "Exotic" or rarity == "Epic":
+        
+        if rarity == "Exotic" or rarity == "Epic" or rarity == "Legendary":
             if percentage > 85:
                 return 1
             if percentage > 30:
