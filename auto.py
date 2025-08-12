@@ -2,11 +2,8 @@
 import capture
 import click_bush  # Import the bush-clicking module
 import attack
-import close_fight
-import capture_action
 import detect_redspeed
-import exit_fight
-import heal_miscrit
+import actions
 import health_percentage_detector
 import ocr_analyser
 
@@ -39,7 +36,7 @@ if __name__ == '__main__':
                     capture_result = capture.capture_decision(percentage=percentage, rarity=miscrit_info["rarity"])
                     if capture_result == 1:
                         print("🟢 Capturable item detected! Proceeding with capture...")
-                        capture_action.capture_miscrit()
+                        actions.capture_miscrit()
                         captured = True
 
                     elif capture_result == 0:
@@ -51,10 +48,10 @@ if __name__ == '__main__':
                 else:
                     break
             
-            close_fight.close_fight()  # Close the fight if needed
+            actions.close_fight()
             
         else:
-            exit_fight.exit_fight_action()
+            actions.exit_fight_action()
         
         print("🟢 Fight closed successfully.")
 
@@ -66,22 +63,22 @@ if __name__ == '__main__':
 
             if rarity == "Exotic":
                 print("🟢 Exotic miscrit captured successfully!")
-                capture_action.keep_action()
+                actions.keep_action()
 
             elif percentage in (27, 17):
                 print("🟢 Common or Rare miscrit captured successfully!")
-                capture_action.keep_action()
+                actions.keep_action()
 
             elif detect_redspeed.run_red_speed_detector():
                 print("🟢 Red speed action completed successfully.")
-                capture_action.keep_action()
+                actions.keep_action()
 
             else:
                 print("🔴 No red speed detected. Proceeding with release action...")
-                capture_action.release_action()
+                actions.release_action()
 
         
         if need_to_heal:
             print("🟢 Healing miscrit...")
-            heal_miscrit.heal_action()
+            actions.heal_action()
 

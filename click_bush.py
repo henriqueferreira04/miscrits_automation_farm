@@ -2,6 +2,8 @@ import pyautogui
 import time
 import random
 import os
+import mouse
+import actions
 
 import ocr_analyser
 
@@ -57,7 +59,7 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
 
 # --- Main part of the script ---
 def run_spot_clicker():
-    SPOT_IMAGES = ['images/octavio.png', 'images/octavio2.png']
+    SPOT_IMAGES = ['images/wooly.png', 'images/wooly2.png']
     CLICK_DELAY = 3.0
 
     print("Starting the bot...")
@@ -99,7 +101,7 @@ def run_spot_clicker():
         else:
             count += 1
             if count > 10:
-                get_clear_view_action()
+                actions.get_clear_view_action()
                 count = 0
             text = ocr_analyser.run_automated_ocr_easyocr()
             print("*"*40)
@@ -108,24 +110,3 @@ def run_spot_clicker():
                 break
 
    
-
-def get_clear_view_action():
-    coor_x = 921
-    coor_y = 305
-    print(f"Moving to clear view action coordinates: ({coor_x}, {coor_y})")
-
-    # Move the mouse to the target with a human-like, random duration
-    pyautogui.moveTo(
-        coor_x,
-        coor_y,
-        duration=random.uniform(0.1, 0.3),
-        tween=pyautogui.easeOutQuad
-    )
-
-    # Perform a realistic click
-    print("Clicking clear view action button...")
-    pyautogui.mouseDown()
-    time.sleep(random.uniform(0.06, 0.16)) # Hold the click briefly
-    pyautogui.mouseUp()
-
-    print("✅ Clear view action complete.")
