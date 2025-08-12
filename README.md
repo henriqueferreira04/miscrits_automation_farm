@@ -3,7 +3,6 @@
 An intelligent automation bot for the Miscrits game that automatically hunts, captures, and manages Miscrits based on their rarity and stats.
 
 ![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)
 
 ## ✨ Features
