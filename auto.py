@@ -3,7 +3,6 @@ import time
 import capture
 import click_bush  # Import the bush-clicking module
 import attack
-import detect_redspeed
 import actions
 import health_percentage_detector
 import keep_release
@@ -45,11 +44,11 @@ if __name__ == '__main__':
                         captured = True
 
                     elif capture_result == 0:
-                        print("🟢⚔️ Capturable item detected. Proceeding with strong attack...")
-                        actions.perform_attack(attack.strong_attack)
+                        print("🟢⚔️ Capturable item detected. Proceeding with first attack...")
+                        actions.perform_attack(attack.first_attack)
                     elif capture_result == 2:
-                        print("🟢⚔️ Capturable item detected! Proceeding with basic attack...")
-                        actions.perform_attack(attack.basic_attack)
+                        print("🟢⚔️ Capturable item detected! Proceeding with forth attack...")
+                        actions.perform_attack(attack.forth_attack)
                 else:
                     break
             

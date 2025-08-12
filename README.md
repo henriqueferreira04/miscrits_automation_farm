@@ -52,3 +52,4 @@ An intelligent automation bot for the Miscrits game that automatically hunts, ca
    ```bash
    python run.py
    ```
+

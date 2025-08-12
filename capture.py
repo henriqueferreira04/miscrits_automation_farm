@@ -1,70 +1,26 @@
 import actions
+import json
+import os
 
-miscrits_dict_rarity = {
-    "Nessy": "Common",
-    "Stalkra": "Common",
-    "Mech": "Common",
-    "Rexie": "Common",
-    "Warrian": "Common",
-    "Aebex": "Common",
-    "Charix": "Rare",
-    "Alpha": "Exotic",
-    "Dark Steamguin": "Rare",
-    "Dark Squibee": "Rare",
-    "Frostmite": "Common",
-    "Dark Kiloray": "Rare",
-    "Cadbunny": "Exotic",
-    "Mistraxol": "Common",
-    "Orbling": "Common",
-    "Zappup": "Common",
-    "Dark Arigato": "Rare",
-    "Bubbles": "Common",
-    "Lavarila": "Common",
-    "Shellbee": "Common",
-    "Elefauna": "Common",
-    "Flameling": "Common",
-    "Quirk": "Common",
-    "Lil Bubs": "Rare",
-    "Dark Lavarila": "Rare",
-    "Dark Tulipinny": "Epic",
-    "Echino": "Common",
-    "Wavesling": "Common",
-    "Sparkitten": "Common",
-    "Arigato": "Common",
-    "Hippoke": "Common",
-    "Ignios": "Rare",
-    "Dark Sparkitten": "Rare",
-    "Pamboo": "Rare",
-    "Light Crickin": "Exotic",
-    "Dark Frostmite": "Rare",
-    "Freezet": "Common",
-    "Frozy": "Common",
-    "Dark Breezycheeks": "Rare",
-    "Wooly": "Legendary",
-    "Statikat": "Common",
-    "Equestrion": "Common",
-    "Drilldent": "Common",
-    "Kiloray": "Common",
-    "Breezycheeks": "Common",
-    "Mumbah": "Common",
-    "Octavio": "Epic",
-    "Opigum": "Rare",
-    "Luna": "Rare",
-    "Poltergust": "Rare",
-    "Wooly": "Legendary",
-    "Wooly": "Legendary",
-}
+# Load Miscrits data from JSON file
+def load_miscrits_data():
+    """Load Miscrits data from the JSON configuration file."""
+    json_path = os.path.join(os.path.dirname(__file__), 'miscrits.json')
+    try:
+        with open(json_path, 'r') as file:
+            data = json.load(file)
+            return data['miscrits_dict_rarity'], data['rarity_percentages']
+    except FileNotFoundError:
+        print(f"Warning: {json_path} not found. Using fallback data.")
+        return {}, {}
+    except json.JSONDecodeError:
+        print(f"Warning: Invalid JSON in {json_path}. Using fallback data.")
+        return {}, {}
 
-rarity_percentages = {
-    "Common": [27, 30, 31],
-    "Rare": [17, 20, 21],
-    "Exotic": [0],
-    "Epic": [0],
-    "Legendary": [0],
-}
+# Load data at module import
+miscrits_dict_rarity, rarity_percentages = load_miscrits_data()
 
 exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks"]
-
 capture_miscrits = ["Dark Breezycheeks"]
 
 
