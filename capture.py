@@ -62,7 +62,7 @@ rarity_percentages = {
     "Legendary": [0],
 }
 
-exception_miscrits = ["Aebex", "Mistraxol"]
+exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks"]
 
 capture_miscrits = ["Dark Breezycheeks"]
 

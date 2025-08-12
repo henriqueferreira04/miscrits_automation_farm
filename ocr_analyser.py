@@ -1,5 +1,4 @@
 import pyautogui
-import easyocr
 import numpy as np
 import cv2
 import time
@@ -12,9 +11,8 @@ import time
 
 
 print("Initializing EasyOCR Reader... (This may take a moment on first run)")
-reader = easyocr.Reader(['en']) # Specify English language
 
-def run_automated_ocr_easyocr(horizontal_start_percent=50, horizontal_end_percent=100,
+def run_automated_ocr_easyocr(reader, horizontal_start_percent=50, horizontal_end_percent=100,
                              vertical_start_percent=0, vertical_end_percent=20):
     """
     Performs fully automated OCR on a screen region using EasyOCR.

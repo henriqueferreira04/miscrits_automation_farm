@@ -2,6 +2,7 @@ import pyautogui
 import time
 import random
 import os
+import keep_release
 import mouse
 import actions
 
@@ -58,7 +59,7 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
         return False
 
 # --- Main part of the script ---
-def run_spot_clicker():
+def run_spot_clicker(reader):
     SPOT_IMAGES = ['images/wooly.png']
     CLICK_DELAY = 3.0
 
@@ -84,7 +85,6 @@ def run_spot_clicker():
     print("You have 3 seconds to switch to your game window...")
     time.sleep(3)
 
-    count = 0
     while True:
         print(f"\nSearching for '{SPOT_IMAGES}' in the designated area...")
 
@@ -98,15 +98,14 @@ def run_spot_clicker():
         if was_successful:
             print(f"Action successful. Waiting for {CLICK_DELAY} seconds...")
             time.sleep(CLICK_DELAY)
-        else:
-            count += 1
-            if count > 10:
-                actions.get_clear_view_action()
-                count = 0
-            text = ocr_analyser.run_automated_ocr_easyocr()
-            print("*"*40)
-            print(text)
-            if "%" in text:
-                break
+            continue
+        
+        text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)
+        print("*"*40)
+        print(text)
+        if "%" in text:
+            break
+
+        keep_release.keep_release_miscrit(reader, miscrit_information=None)
 
    

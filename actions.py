@@ -88,6 +88,11 @@ def get_clear_view_action():
     mouse.move_click(coor_x, coor_y, "clear view action")
 
 
+def perform_attack(attack_coordinates):
+    coor_x = int(pyautogui.size().width * (attack_coordinates[0] / 1920))
+    coor_y = int(pyautogui.size().height * (attack_coordinates[1] / 1080))
+    
+    mouse.move_click(coor_x, coor_y, "attack")
 
 def capture_miscrit():
     time.sleep(2)
