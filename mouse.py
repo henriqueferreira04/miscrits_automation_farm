@@ -3,7 +3,7 @@ import random
 import time
 
 def move_click(percentage_x, percentage_y, action):
-    print(f"Moving to confirm {action} coordinates: ({percentage_x}, {percentage_y})")
+    print(f"Moving to confirm {action} coordinates")
 
     # Move the mouse to the target with a human-like, random duration
     pyautogui.moveTo(

@@ -32,3 +32,5 @@ def find_coordinates():
         print("Now, update the ATTACK_X and ATTACK_Y variables in the script.")
 
 
+if __name__ == "__main__":
+    find_coordinates()

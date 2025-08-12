@@ -1,3 +1,4 @@
+import actions
 
 miscrits_dict_rarity = {
     "Nessy": "Common",
@@ -110,8 +111,7 @@ def is_to_capture(text):
 
 def capture_decision(percentage, rarity):
     if isinstance(percentage, int):
-        
-        if rarity == "Exotic" or rarity == "Epic" or rarity == "Legendary":
+        if rarity == "Exotic" or rarity == "Epic":
             if percentage > 85:
                 return 1
             if percentage > 30:
@@ -120,10 +120,19 @@ def capture_decision(percentage, rarity):
             if percentage > 95:
                 return 1
             return 2
+        
+        elif rarity == "Legendary":
+            if percentage > 70:
+                return 1
+            else:
+                actions.move_left_attack_page()
+                actions.move_left_attack_page()
+                return 2
         else:
             if percentage > 95:
                 return 1
             if percentage > 35:
                 return 2
+        
 
     return 0

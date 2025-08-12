@@ -94,6 +94,14 @@ def perform_attack(attack_coordinates):
     
     mouse.move_click(coor_x, coor_y, "attack")
 
+
+def move_left_attack_page():
+    coor_x = int(pyautogui.size().width * (1519/1920))
+    coor_y = int(pyautogui.size().height * (1010/1080))
+
+    mouse.move_click(coor_x, coor_y, "move left attack page")
+
+
 def capture_miscrit():
     time.sleep(2)
     capture_action()
