@@ -11,6 +11,7 @@ import ocr_analyser
 
 # --- Main execution block ---
 if __name__ == '__main__':
+    captured_miscrits = []  # Initialize captured status
     while True:
         click_bush.run_spot_clicker()  # Run the bush-clicking function
         
@@ -23,7 +24,8 @@ if __name__ == '__main__':
 
 
         need_to_heal = health_percentage_detector.is_health_critical()
-        captured = False  # Initialize captured status
+        
+
         if miscrit_info:
             print("🟢 Capturable item detected! Proceeding with bush clicker...")
             while True: 
@@ -37,7 +39,7 @@ if __name__ == '__main__':
                     if capture_result == 1:
                         print("🟢 Capturable item detected! Proceeding with capture...")
                         actions.capture_miscrit()
-                        captured = True
+                        captured_miscrits.append(miscrit_info)
 
                     elif capture_result == 0:
                         print("🟢⚔️ Capturable item detected. Proceeding with strong attack...")
@@ -56,10 +58,9 @@ if __name__ == '__main__':
         print("🟢 Fight closed successfully.")
 
         
-
-        if captured:
-            rarity = miscrit_info["rarity"]
-            percentage = miscrit_info["class"]
+        for miscrit in captured_miscrits:
+            rarity = miscrit["rarity"]
+            percentage = miscrit["class"]
 
             if rarity == "Exotic":
                 print("🟢 Exotic miscrit captured successfully!")
@@ -77,8 +78,12 @@ if __name__ == '__main__':
                 print("🔴 No red speed detected. Proceeding with release action...")
                 actions.release_action()
 
+            captured_miscrits.remove(miscrit)
         
         if need_to_heal:
             print("🟢 Healing miscrit...")
             actions.heal_action()
+
+
+        
 

@@ -50,7 +50,8 @@ miscrits_dict_rarity = {
     "Opigum": "Rare",
     "Luna": "Rare",
     "Poltergust": "Rare",
-
+    "Wooly": "Legendary",
+    "Wooly": "Legendary",
 }
 
 rarity_percentages = {
@@ -61,7 +62,9 @@ rarity_percentages = {
     "Legendary": [0],
 }
 
-exception_miscrits = ["Aebex"]
+exception_miscrits = ["Aebex", "Mistraxol"]
+
+capture_miscrits = ["Dark Breezycheeks"]
 
 
 
@@ -89,8 +92,9 @@ def is_to_capture(text):
                 if percentage.isdigit():
                     percentage = int(percentage)
                     miscrit_dict["class"] = percentage
+                    
 
-                    if percentage in rarity_percentages[rarity]:
+                    if percentage in rarity_percentages[rarity] or miscrit_dict["name"] in capture_miscrits:
                         print(f"Capture {keyword} with rarity {rarity} and percentage {percentage}%")
 
                         if keyword in exception_miscrits:

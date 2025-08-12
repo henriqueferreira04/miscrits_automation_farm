@@ -59,7 +59,7 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
 
 # --- Main part of the script ---
 def run_spot_clicker():
-    SPOT_IMAGES = ['images/wooly.png', 'images/wooly2.png']
+    SPOT_IMAGES = ['images/wooly.png']
     CLICK_DELAY = 3.0
 
     print("Starting the bot...")
