@@ -14,8 +14,10 @@ import easyocr
 # --- Main execution block ---
 if __name__ == '__main__':
     reader = easyocr.Reader(['en']) # Specify English language
+    SPOT_IMAGES = ['images/shurikoon.png', 'images/shurikoon2.png']
+
     while True:
-        click_bush.run_spot_clicker(reader)  # Run the bush-clicking function
+        click_bush.run_spot_clicker(reader, SPOT_IMAGES)  # Run the bush-clicking function
         
         while True:
             text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)
@@ -41,23 +43,29 @@ if __name__ == '__main__':
                     if capture_result == 1:
                         print("🟢 Capturable item detected! Proceeding with capture...")
                         actions.capture_miscrit()
+
                         captured = True
 
                     elif capture_result == 0:
                         print("🟢⚔️ Capturable item detected. Proceeding with first attack...")
                         actions.perform_attack(attack.first_attack)
                     elif capture_result == 2:
-                        print("🟢⚔️ Capturable item detected! Proceeding with forth attack...")
-                        actions.perform_attack(attack.forth_attack)
+                        print("🟢⚔️ Capturable item detected! Proceeding with third attack...")
+                        actions.perform_attack(attack.third_attack)
                 else:
                     break
             
-            actions.close_fight()
-            
         else:
-            actions.exit_fight_action()
-            
-        
+            #ctions.exit_fight_action()
+            while True:
+                text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)   
+                if text:
+                    actions.perform_attack(attack.first_attack)
+                else:
+                    break
+
+        actions.close_fight()
+
         print("🟢 Fight closed successfully.")
         time.sleep(2)
 

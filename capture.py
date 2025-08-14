@@ -24,20 +24,29 @@ exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks"]
 capture_miscrits = ["Dark Breezycheeks"]
 
 
-
+count = 0
 
 def is_to_capture(text):
     """
     Detects and captures specific keywords from the OCR text.
     """
     miscrit_dict = {}
+    global count
     for keyword, rarity in miscrits_dict_rarity.items():
         if keyword in text:
             print(f"Detected '{keyword}' with rarity: {rarity}")
             miscrit_dict["name"] = keyword
             miscrit_dict["rarity"] = rarity
             miscrit_dict["class"] = 0
-            
+
+            with open("captured_miscrits.txt", "a") as file:  #save in file txt the miscrits name detected with the automation
+                count += 1
+                if count < 20:
+                    file.write(f"{miscrit_dict['name']}, \t")
+                else:
+                    file.write(f"{miscrit_dict['name']}, \n")
+                    count = 0
+
             if rarity != "Exotic":
                 percentage = text.split(" ")[-1]
                 if "%" not in percentage:
@@ -62,6 +71,10 @@ def is_to_capture(text):
             else:
                 print(f"Capture {keyword} with rarity {rarity} (Exotic)")
                 return miscrit_dict
+    
+    with open("captured_miscrits.txt", "a") as file:    #save in file txt the miscrits name not detected with the automation 
+        file.write(f"{text}, \t")                       #trying to find if miscrit is not detecting name correctly
+        count += 1
     return None
 
 

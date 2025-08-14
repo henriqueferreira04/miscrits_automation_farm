@@ -3,7 +3,7 @@ import actions
 import detect_redspeed
 
 
-def keep_release_miscrit(reader, miscrit_information):
+def keep_release_miscrit(reader, miscrit_information=None):
     text = ocr_analyser.run_automated_ocr_easyocr(
                 reader=reader,
                 horizontal_start_percent=40, horizontal_end_percent=50,
@@ -33,6 +33,10 @@ def keep_release_miscrit(reader, miscrit_information):
         else:
             print("🔴 No red speed detected. Proceeding with release action...")
             actions.release_action()
+
+        return True
+    else:
+        return False
 
 
     

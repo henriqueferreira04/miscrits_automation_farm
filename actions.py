@@ -102,6 +102,18 @@ def move_left_attack_page():
     mouse.move_click(coor_x, coor_y, "move left attack page")
 
 
+def okay_success_mission():
+    coor_x = int(pyautogui.size().width * (949/1920))
+    coor_y = int(pyautogui.size().height * (666/1080))
+
+    mouse.move_click(coor_x, coor_y, "okay success mission")
+
+def okay_rank_up():
+    coor_x = int(pyautogui.size().width * (955/1920))
+    coor_y = int(pyautogui.size().height * (739/1080))
+
+    mouse.move_click(coor_x, coor_y, "okay rank up")
+
 def capture_miscrit():
     time.sleep(2)
     capture_action()

@@ -1,10 +1,8 @@
 import pyautogui
 import time
 import random
-import os
-import keep_release
-import mouse
-import actions
+import stuck_pop_ups
+
 
 import ocr_analyser
 
@@ -59,8 +57,8 @@ def find_and_click_spot(image_file, search_region, confidence_level=0.8):
         return False
 
 # --- Main part of the script ---
-def run_spot_clicker(reader):
-    SPOT_IMAGES = ['images/wooly.png']
+def run_spot_clicker(reader, spot_images):
+    
     CLICK_DELAY = 3.0
 
     print("Starting the bot...")
@@ -86,11 +84,11 @@ def run_spot_clicker(reader):
     time.sleep(3)
 
     while True:
-        print(f"\nSearching for '{SPOT_IMAGES}' in the designated area...")
+        print(f"\nSearching for '{spot_images}' in the designated area...")
 
-        for SPOT_IMAGE in SPOT_IMAGES:
+        for spot_image in spot_images:
             # Call the function, passing the newly calculated search region
-            was_successful = find_and_click_spot(SPOT_IMAGE, search_region, confidence_level=0.8)
+            was_successful = find_and_click_spot(spot_image, search_region, confidence_level=0.8)
 
             if was_successful:
                 break
@@ -106,6 +104,6 @@ def run_spot_clicker(reader):
         if "%" in text:
             break
 
-        keep_release.keep_release_miscrit(reader, miscrit_information=None)
+        stuck_pop_ups.check_for_stuck_popups(reader=reader)
 
    
