@@ -1,4 +1,5 @@
 
+import warnings
 import time
 import capture
 import click_bush  # Import the bush-clicking module
@@ -8,14 +9,26 @@ import health_percentage_detector
 import keep_release
 import ocr_analyser
 import easyocr
+import sys
+
+# Suppress PyTorch MPS warnings on Apple Silicon
+warnings.filterwarnings("ignore", message=".*pin_memory.*not supported on MPS.*", category=UserWarning)
+
+def disable_print():
+    sys.stdout = open('/dev/null', 'w')
+
+def enable_print():
+    sys.stdout = sys.__stdout__
+
 
 
 
 # --- Main execution block ---
 if __name__ == '__main__':
+    disable_print()  # Disable print statements for cleaner output
     reader = easyocr.Reader(['en']) # Specify English language
     SPOT_IMAGES = ['images/shurikoon.png', 'images/shurikoon2.png', 'images/shurikoon3.png']
-
+    
     while True:
         click_bush.run_spot_clicker(reader, SPOT_IMAGES)  # Run the bush-clicking function
         

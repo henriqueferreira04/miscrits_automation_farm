@@ -96,14 +96,19 @@ def run_spot_clicker(reader, spot_images):
         if was_successful:
             print(f"Action successful. Waiting for {CLICK_DELAY} seconds...")
             time.sleep(CLICK_DELAY)
-            continue
         
-        text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)
-        print("*"*40)
-        print(text)
-        if "%" in text:
-            break
+            text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)
+            print("*"*40)
+            print(text)
+            if "%" in text:
+                break
 
-        stuck_pop_ups.check_for_stuck_popups(reader=reader)
+        else:
+            text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)
+            print("*"*40)
+            print(text)
+            if "%" in text:
+                break
+            stuck_pop_ups.check_for_stuck_popups(reader=reader)
 
    
