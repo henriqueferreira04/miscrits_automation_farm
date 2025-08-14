@@ -18,11 +18,11 @@ def keep_release_miscrit(reader, miscrit_information=None):
         rarity = miscrit_information["rarity"]
         percentage = miscrit_information["class"]
 
-        if rarity == "Exotic":
-            print("🟢 Exotic miscrit captured successfully!")
+        if rarity == "Exotic" or rarity == "Epic" or rarity == "Legendary":
+            print("🟢 Exotic, Epic, or Legendary miscrit captured successfully!")
             actions.keep_action()
 
-        elif percentage in (27, 17):
+        elif percentage in (27, 17, 28, 18):
             print("🟢 Common or Rare miscrit captured successfully!")
             actions.keep_action()
 

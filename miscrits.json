@@ -29,6 +29,7 @@
         "Kiloray": "Common",
         "Breezycheeks": "Common",
         "Mumbah": "Common",
+        "Vhisp": "Common",
         "Charix": "Rare",
         "Dark Steamguin": "Rare",
         "Dark Squibee": "Rare",
@@ -53,9 +54,9 @@
         "Woolly": "Legendary"
     },
     "rarity_percentages": {
-        "Common": [27, 30, 31],
-        "Rare": [17, 20, 21],
-        "Epic": [10, 12, 13],
+        "Common": [27, 28, 30, 31],
+        "Rare": [17, 18, 20, 21],
+        "Epic": [7, 8, 10, 11],
         "Exotic": [0],
         "Legendary": [0]
     }

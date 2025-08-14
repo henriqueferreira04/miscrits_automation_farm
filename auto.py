@@ -14,7 +14,7 @@ import easyocr
 # --- Main execution block ---
 if __name__ == '__main__':
     reader = easyocr.Reader(['en']) # Specify English language
-    SPOT_IMAGES = ['images/shurikoon.png', 'images/shurikoon2.png']
+    SPOT_IMAGES = ['images/shurikoon.png', 'images/shurikoon2.png', 'images/shurikoon3.png']
 
     while True:
         click_bush.run_spot_clicker(reader, SPOT_IMAGES)  # Run the bush-clicking function
