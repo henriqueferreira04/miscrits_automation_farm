@@ -22,7 +22,7 @@ def keep_release_miscrit(reader, miscrit_information=None):
             print("🟢 Exotic, Epic, or Legendary miscrit captured successfully!")
             actions.keep_action()
 
-        elif percentage in (27, 17, 28, 18):
+        elif percentage in (27, 17):
             print("🟢 Common or Rare miscrit captured successfully!")
             actions.keep_action()
 

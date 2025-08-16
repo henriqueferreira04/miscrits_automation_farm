@@ -20,7 +20,7 @@ def load_miscrits_data():
 # Load data at module import
 miscrits_dict_rarity, rarity_percentages = load_miscrits_data()
 
-exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks"]
+exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks", "Shurikoon", "Vhisp"]
 capture_miscrits = ["Dark Breezycheeks"]
 
 
@@ -47,7 +47,7 @@ def is_to_capture(text):
                     file.write(f"{miscrit_dict['name']}, \n")
                     count = 0
 
-            if rarity != "Exotic":
+            if rarity == "Common" or rarity == "Rare":
                 percentage = text.split(" ")[-1]
                 if "%" not in percentage:
                     miscrit_dict["rarity"] = "Error"
@@ -68,8 +68,9 @@ def is_to_capture(text):
                         
                         return miscrit_dict
             
-            else:
+            else:       
                 print(f"Capture {keyword} with rarity {rarity} (Exotic)")
+
                 return miscrit_dict
     
     with open("captured_miscrits.txt", "a") as file:    #save in file txt the miscrits name not detected with the automation 
@@ -78,11 +79,13 @@ def is_to_capture(text):
     return None
 
 
-def capture_decision(percentage, rarity):
+def capture_decision(miscrit_name, percentage, rarity):
     if isinstance(percentage, int):
         if rarity == "Exotic" or rarity == "Epic":
             if percentage > 85:
                 return 1
+            if miscrit_name in exception_miscrits:
+                return 2
             if percentage > 30:
                 return 2
         elif rarity == "Exception":
@@ -97,6 +100,7 @@ def capture_decision(percentage, rarity):
                 actions.move_left_attack_page()
                 actions.move_left_attack_page()
                 return 2
+            
         else:
             if percentage > 95:
                 return 1

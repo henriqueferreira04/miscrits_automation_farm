@@ -60,9 +60,9 @@
         "Woolly": "Legendary"
     },
     "rarity_percentages": {
-        "Common": [27, 28, 30, 31],
-        "Rare": [17, 18, 20, 21],
-        "Epic": [7, 8, 10, 11],
+        "Common": [27, 30, 31],
+        "Rare": [17, 20, 21],
+        "Epic": [0],
         "Exotic": [0],
         "Legendary": [0]
     }
