@@ -7,6 +7,7 @@ import attack
 import actions
 import health_percentage_detector
 import keep_release
+import miscrit_train
 import ocr_analyser
 import easyocr
 import sys
@@ -28,6 +29,9 @@ if __name__ == '__main__':
     disable_print()  # Disable print statements for cleaner output
     reader = easyocr.Reader(['en']) # Specify English language
     SPOT_IMAGES = ['images/shurikoon.png', 'images/shurikoon2.png', 'images/shurikoon3.png']
+    is_miscrit2_plat = True  # Set to True if you want to use platinum training for miscrit 2
+    is_miscrit3_plat = False  # Set to True if you want to use platinum training for miscrit 3
+    is_miscrit4_plat = False  # Set to True if you want to use platinum training for miscrit 4
 
     while True:
         click_bush.run_spot_clicker(reader, SPOT_IMAGES)  # Run the bush-clicking function
@@ -78,6 +82,9 @@ if __name__ == '__main__':
                 else:
                     break
 
+
+        train_3tuple = miscrit_train.check_need_to_train()
+
         actions.close_fight()
 
         print("🟢 Fight closed successfully.")
@@ -113,6 +120,8 @@ if __name__ == '__main__':
             print("🟢 Healing miscrit...")
             actions.heal_action()
 
-
-        
+        if train_3tuple[0] or train_3tuple[1] or train_3tuple[2]:
+            for i in range(3):
+                if train_3tuple[i]:
+                    actions.train_miscrit(i + 2, is_miscrit2_plat if i == 0 else is_miscrit3_plat if i == 1 else is_miscrit4_plat)
 

@@ -114,6 +114,62 @@ def okay_rank_up():
 
     mouse.move_click(coor_x, coor_y, "okay rank up")
 
+
+def train_miscrit2():
+    coor_x = int(pyautogui.size().width * (604/1920))
+    coor_y = int(pyautogui.size().height * (50/1080))
+
+    mouse.move_click(coor_x, coor_y, "train miscrit2 button")
+
+def train_miscrit3():
+    coor_x = int(pyautogui.size().width * (663/1920))
+    coor_y = int(pyautogui.size().height * (50/1080))
+
+    mouse.move_click(coor_x, coor_y, "train miscrit3 button")
+
+def train_miscrit4():
+    coor_x = int(pyautogui.size().width * (722/1920))
+    coor_y = int(pyautogui.size().height * (50/1080))
+
+    mouse.move_click(coor_x, coor_y, "train miscrit4 button")
+
+def train_now_action():
+    coor_x = int(pyautogui.size().width * (982/1920))
+    coor_y = int(pyautogui.size().height * (218/1080))
+
+    mouse.move_click(coor_x, coor_y, "train action")
+
+def platinum_action():
+    coor_x = int(pyautogui.size().width * (898/1920))
+    coor_y = int(pyautogui.size().height * (898/1080))
+
+    mouse.move_click(coor_x, coor_y, "platinum action")
+
+
+def continue_train_action():
+    coor_x = int(pyautogui.size().width * (1150/1920))
+    coor_y = int(pyautogui.size().height * (894/1080))
+
+    mouse.move_click(coor_x, coor_y, "continue train action")
+
+def continue_plat_train_action():
+    coor_x = int(pyautogui.size().width * (962/1920))
+    coor_y = int(pyautogui.size().height * (896/1080))
+
+    mouse.move_click(coor_x, coor_y, "continue platinum train action")
+
+def new_attack_continue():
+    coor_x = int(pyautogui.size().width * (1115/1920))
+    coor_y = int(pyautogui.size().height * (697/1080))
+
+    mouse.move_click(coor_x, coor_y, "new attack continue")
+
+def close_train_page():
+    coor_x = int(pyautogui.size().width * (1381/1920))
+    coor_y = int(pyautogui.size().height * (177/1080))
+
+    mouse.move_click(coor_x, coor_y, "close train page")
+
 def capture_miscrit():
     time.sleep(2)
     capture_action()
@@ -122,6 +178,31 @@ def capture_miscrit():
     time.sleep(6)  # Wait for the okay action to complete
 
 
+def train_miscrit(miscrit, is_plat_train):
+    if miscrit == 2:
+        train_miscrit2()
+    elif miscrit == 3:
+        train_miscrit3()
+    elif miscrit == 4:
+        train_miscrit4()
+
+    time.sleep(1)  # Wait for the train action to process
+    train_now_action()
+
+    time.sleep(1)  # Wait for the train now action to complete
+    if is_plat_train:
+        platinum_action()
+        time.sleep(1)
+        continue_plat_train_action()
+    else:
+        continue_train_action()
+        time.sleep(1)
+        continue_train_action()
+
+    time.sleep(1)  # Wait for the continue action to complete
+    new_attack_continue()
+    time.sleep(1)  # Wait for the new attack continue action to complete
+    close_train_page()
 
 if __name__ == "__main__":
     close_fight()
