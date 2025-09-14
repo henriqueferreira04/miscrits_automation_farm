@@ -3,6 +3,7 @@ import time
 import sys
 import os
 from PIL import ImageDraw
+from PIL import Image
 pyautogui.draw = ImageDraw
 
 # ==============================================================================
@@ -109,10 +110,21 @@ def create_debug_image(anchor_box):
         print(f"Could not create debug image: {e}")
 
 
+def test():
+    initial_anchor = pyautogui.locateOnScreen(ANCHOR_IMAGE, confidence=CONFIDENCE_LEVEL)
+    if initial_anchor:
+        create_debug_image(initial_anchor)
+    else:
+        print(f"❌ Could not find anchor image '{ANCHOR_IMAGE}' on screen to create debug image.")
+
+if __name__ == "__main__":
+    test()
+
 def run_red_speed_detector():
     """
     Main loop to find the anchor and check for the red number.
     """
+    '''
     print("--- Red Number Detector ---")
     
     # --- One-time debug image generation ---
@@ -126,6 +138,7 @@ def run_red_speed_detector():
     except pyautogui.PyAutoGUIException as e:
         print(f"An OS-level error occurred trying to find the image: {e}")
 
+    '''
     # --- Main operational loop ---
     print("--- Starting main loop. Press Ctrl+C to stop. ---")
     try:
@@ -144,6 +157,8 @@ def run_red_speed_detector():
                     # For example, click your attack button
                     # pyautogui.click(1250, 800) 
                     #
+                    # Display the anchor image for verification
+                    
                     
                     print("Action complete. Pausing before resuming scan...")
                     time.sleep(SCAN_INTERVAL * 2) # Longer pause after a successful action
@@ -165,4 +180,4 @@ def run_red_speed_detector():
 if __name__ == "__main__":
     
 
-    run_red_speed_detector()
+    test()

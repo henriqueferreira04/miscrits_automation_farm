@@ -2,9 +2,12 @@ import pyautogui
 import time
 import random
 import stuck_pop_ups
+import mouse
 
 
 import ocr_analyser
+
+
 
 def find_and_click_spot(image_file, search_region, confidence_level=0.8):
     """
@@ -83,14 +86,27 @@ def run_spot_clicker(reader, spot_images):
     print("You have 3 seconds to switch to your game window...")
     time.sleep(3)
 
+    success_times = 0
     while True:
         print(f"\nSearching for '{spot_images}' in the designated area...")
+
+        if not spot_images:
+            coor_x = 667
+            coor_y = 333
+            mouse.move_click(coor_x, coor_y, "spot")
+            was_successful = True
 
         for spot_image in spot_images:
             # Call the function, passing the newly calculated search region
             was_successful = find_and_click_spot(spot_image, search_region, confidence_level=0.8)
 
             if was_successful:
+                success_times += 1
+                print(f"Success count: {success_times}")
+                if success_times > 6:
+                    success_times = 0
+                    was_successful = False
+
                 break
 
         if was_successful:
@@ -102,6 +118,7 @@ def run_spot_clicker(reader, spot_images):
             print(text)
             if "%" in text:
                 break
+
 
         else:
             text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)

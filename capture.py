@@ -99,7 +99,7 @@ def capture_decision(miscrit_name, percentage, rarity):
             else:
                 actions.move_left_attack_page()
                 actions.move_left_attack_page()
-                return 2
+                return 4
             
         else:
             if percentage > 95:

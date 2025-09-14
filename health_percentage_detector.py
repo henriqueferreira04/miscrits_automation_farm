@@ -188,3 +188,5 @@ def is_ready_to_train(horizontal_start, horizontal_end, vertical_start, vertical
         return False
 
 
+
+

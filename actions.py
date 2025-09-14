@@ -31,6 +31,7 @@ def close_fight():
 
 def capture_action():
     # Original coordinates: (962, 146) on 1920x1080
+    time.sleep(2)  # Wait for the screen to stabilize
     coor_x = int(pyautogui.size().width * (962 / 1920))
     coor_y = int(pyautogui.size().height * (146 / 1080))
 
@@ -47,8 +48,8 @@ def okay_action():
 
 def keep_action():
     # Original coordinates: (875, 682) on 1920x1080
-    coor_x = int(pyautogui.size().width * (875 / 1920))
-    coor_y = int(pyautogui.size().height * (682 / 1080))
+    coor_x = int(pyautogui.size().width * (888 / 1920))
+    coor_y = int(pyautogui.size().height * (714 / 1080))
 
     mouse.move_click(coor_x, coor_y, "keep action")
 
@@ -56,7 +57,7 @@ def keep_action():
 def release_action():
     # Original coordinates: (1033, 678) on 1920x1080
     coor_x = int(pyautogui.size().width * (1033 / 1920))
-    coor_y = int(pyautogui.size().height * (678 / 1080))
+    coor_y = int(pyautogui.size().height * (714 / 1080))
 
     mouse.move_click(coor_x, coor_y, "release action")
     time.sleep(2)  # Wait before confirming
@@ -134,7 +135,7 @@ def train_miscrit4():
     mouse.move_click(coor_x, coor_y, "train miscrit4 button")
 
 def train_now_action():
-    coor_x = int(pyautogui.size().width * (982/1920))
+    coor_x = int(pyautogui.size().width * (994/1920))
     coor_y = int(pyautogui.size().height * (218/1080))
 
     mouse.move_click(coor_x, coor_y, "train action")
@@ -170,12 +171,12 @@ def close_train_page():
 
     mouse.move_click(coor_x, coor_y, "close train page")
 
-def capture_miscrit():
-    time.sleep(2)
-    capture_action()
-    time.sleep(6)  # Wait for the capture to process
-    okay_action()
-    time.sleep(6)  # Wait for the okay action to complete
+
+def okay_evolve_miscrit():
+    coor_x = int(pyautogui.size().width * (962/1920))
+    coor_y = int(pyautogui.size().height * (843/1080))
+
+    mouse.move_click(coor_x, coor_y, "okay evolve miscrit")
 
 
 def train_miscrit(miscrit, is_plat_train):
@@ -191,6 +192,8 @@ def train_miscrit(miscrit, is_plat_train):
 
     time.sleep(1)  # Wait for the train now action to complete
     if is_plat_train:
+        platinum_action()
+        time.sleep(1)
         platinum_action()
         time.sleep(1)
         continue_plat_train_action()
