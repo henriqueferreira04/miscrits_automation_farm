@@ -3,7 +3,7 @@ import warnings
 import time
 import capture
 import click_bush  # Import the bush-clicking module
-import attack
+import config
 import actions
 import health_percentage_detector
 import keep_release
@@ -88,13 +88,13 @@ if __name__ == '__main__':
 
                     elif capture_result == 0:
                         print("🟢⚔️ Capturable item detected. Proceeding with first attack...")
-                        actions.perform_attack(attack.first_attack)
+                        actions.perform_attack(config.first_attack)
                     elif capture_result == 2:
                         print("🟢⚔️ Capturable item detected! Proceeding with third attack...")
-                        actions.perform_attack(attack.third_attack)
+                        actions.perform_attack(config.third_attack)
                     elif capture_result == 4:
                         print("🟢⚔️ Capturable item detected! Proceeding with forth attack...")
-                        actions.perform_attack(attack.forth_attack)
+                        actions.perform_attack(config.forth_attack)
                 else:
                     break
             
@@ -103,7 +103,7 @@ if __name__ == '__main__':
             while True:
                 text = ocr_analyser.run_automated_ocr_easyocr(reader=reader)   
                 if text:
-                    actions.perform_attack(attack.first_attack)
+                    actions.perform_attack(config.first_attack)
                 else:
                     break
 

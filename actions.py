@@ -2,12 +2,14 @@ import mouse
 import pyautogui
 import time
 
+import config
+
 
 def exit_fight_action():
     # Calculate coordinates based on percentage of the screen resolution
     # Original coordinates were (396, 891) on a 1920x1080 screen.
-    coor_x = int(pyautogui.size().width * (396 / 1920)) 
-    coor_y = int(pyautogui.size().height * (891 / 1080))  
+    coor_x = config.exit_fight_coord[0]
+    coor_y = config.exit_fight_coord[1]
 
     mouse.move_click(coor_x, coor_y, "exit fight")
 
@@ -16,15 +18,15 @@ def exit_fight_action():
 
 
 def confirm_fight_action():
-    coor_x = int(pyautogui.size().width * (888 / 1920)) 
-    coor_y = int(pyautogui.size().height * (695 / 1080)) 
+    coor_x = config.confirm_fight_coord[0]
+    coor_y = config.confirm_fight_coord[1]
 
     mouse.move_click(coor_x, coor_y, "confirm exit fight")
     
 
 def close_fight():
-    coor_x = int(pyautogui.size().width * (949 / 1920)) 
-    coor_y = int(pyautogui.size().height * (838 / 1080)) 
+    coor_x = config.close_fight_coord[0]
+    coor_y = config.close_fight_coord[1]
 
     mouse.move_click(coor_x, coor_y, "close fight")
 
@@ -32,32 +34,32 @@ def close_fight():
 def capture_action():
     # Original coordinates: (962, 146) on 1920x1080
     time.sleep(2)  # Wait for the screen to stabilize
-    coor_x = int(pyautogui.size().width * (962 / 1920))
-    coor_y = int(pyautogui.size().height * (146 / 1080))
+    coor_x = config.capture_action_coord[0]
+    coor_y = config.capture_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "capture action")
 
 
 def okay_action():
     # Original coordinates: (913, 624) on 1920x1080
-    coor_x = int(pyautogui.size().width * (913 / 1920))
-    coor_y = int(pyautogui.size().height * (624 / 1080))
+    coor_x = config.okay_action_coord[0]
+    coor_y = config.okay_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "okay action")
 
 
 def keep_action():
     # Original coordinates: (875, 682) on 1920x1080
-    coor_x = int(pyautogui.size().width * (888 / 1920))
-    coor_y = int(pyautogui.size().height * (714 / 1080))
+    coor_x = config.keep_action_coord[0]
+    coor_y = config.keep_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "keep action")
 
 
 def release_action():
     # Original coordinates: (1033, 678) on 1920x1080
-    coor_x = int(pyautogui.size().width * (1033 / 1920))
-    coor_y = int(pyautogui.size().height * (714 / 1080))
+    coor_x = config.release_action_coord[0]
+    coor_y = config.release_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "release action")
     time.sleep(2)  # Wait before confirming
@@ -66,8 +68,8 @@ def release_action():
 
 def confirm_action():
     # Original coordinates: (903, 615) on 1920x1080
-    coor_x = int(pyautogui.size().width * (903 / 1920))
-    coor_y = int(pyautogui.size().height * (615 / 1080))
+    coor_x = config.confirm_action_coord[0]
+    coor_y = config.confirm_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "confirm release action")
 
@@ -75,106 +77,106 @@ def confirm_action():
 def heal_action():
     time.sleep(2)  # Wait for screen to stabilize
     # Original coordinates: (1200, 60) on 1920x1080
-    coor_x = int(pyautogui.size().width * (1200 / 1920))
-    coor_y = int(pyautogui.size().height * (60 / 1080))
+    coor_x = config.heal_action_coord[0]
+    coor_y = config.heal_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "heal action")
     time.sleep(2)  # Wait for heal action to process
     confirm_action()
 
 def get_clear_view_action():
-    coor_x = int(pyautogui.size().width * (921/1920))
-    coor_y = int(pyautogui.size().height * (305/1080))
+    coor_x = config.get_clear_view_coord[0]
+    coor_y = config.get_clear_view_coord[1]
 
     mouse.move_click(coor_x, coor_y, "clear view action")
 
 
 def perform_attack(attack_coordinates):
-    coor_x = int(pyautogui.size().width * (attack_coordinates[0] / 1920))
-    coor_y = int(pyautogui.size().height * (attack_coordinates[1] / 1080))
-    
+    coor_x = attack_coordinates[0]
+    coor_y = attack_coordinates[1]
+
     mouse.move_click(coor_x, coor_y, "attack")
 
 
 def move_left_attack_page():
-    coor_x = int(pyautogui.size().width * (1519/1920))
-    coor_y = int(pyautogui.size().height * (1010/1080))
+    coor_x = config.move_left_attack_page_coord[0]
+    coor_y = config.move_left_attack_page_coord[1]
 
     mouse.move_click(coor_x, coor_y, "move left attack page")
 
 
 def okay_success_mission():
-    coor_x = int(pyautogui.size().width * (949/1920))
-    coor_y = int(pyautogui.size().height * (666/1080))
+    coor_x = config.okay_success_coord[0]
+    coor_y = config.okay_success_coord[1]
 
     mouse.move_click(coor_x, coor_y, "okay success mission")
 
 def okay_rank_up():
-    coor_x = int(pyautogui.size().width * (955/1920))
-    coor_y = int(pyautogui.size().height * (739/1080))
+    coor_x = config.okay_rank_up_coord[0]
+    coor_y = config.okay_rank_up_coord[1]
 
     mouse.move_click(coor_x, coor_y, "okay rank up")
 
 
 def train_miscrit2():
-    coor_x = int(pyautogui.size().width * (604/1920))
-    coor_y = int(pyautogui.size().height * (50/1080))
+    coor_x = config.train_miscrit2_coord[0]
+    coor_y = config.train_miscrit2_coord[1]
 
     mouse.move_click(coor_x, coor_y, "train miscrit2 button")
 
 def train_miscrit3():
-    coor_x = int(pyautogui.size().width * (663/1920))
-    coor_y = int(pyautogui.size().height * (50/1080))
+    coor_x = config.train_miscrit3_coord[0]
+    coor_y = config.train_miscrit3_coord[1]
 
     mouse.move_click(coor_x, coor_y, "train miscrit3 button")
 
 def train_miscrit4():
-    coor_x = int(pyautogui.size().width * (722/1920))
-    coor_y = int(pyautogui.size().height * (50/1080))
+    coor_x = config.train_miscrit4_coord[0]
+    coor_y = config.train_miscrit4_coord[1]
 
     mouse.move_click(coor_x, coor_y, "train miscrit4 button")
 
 def train_now_action():
-    coor_x = int(pyautogui.size().width * (994/1920))
-    coor_y = int(pyautogui.size().height * (218/1080))
+    coor_x = config.train_now_coord[0]
+    coor_y = config.train_now_coord[1]
 
     mouse.move_click(coor_x, coor_y, "train action")
 
 def platinum_action():
-    coor_x = int(pyautogui.size().width * (898/1920))
-    coor_y = int(pyautogui.size().height * (898/1080))
+    coor_x = config.platinum_action_coord[0]
+    coor_y = config.platinum_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "platinum action")
 
 
 def continue_train_action():
-    coor_x = int(pyautogui.size().width * (1150/1920))
-    coor_y = int(pyautogui.size().height * (894/1080))
+    coor_x = config.continue_action_coord[0]
+    coor_y = config.continue_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "continue train action")
 
 def continue_plat_train_action():
-    coor_x = int(pyautogui.size().width * (962/1920))
-    coor_y = int(pyautogui.size().height * (896/1080))
+    coor_x = config.continue_plat_train_action_coord[0]
+    coor_y = config.continue_plat_train_action_coord[1]
 
     mouse.move_click(coor_x, coor_y, "continue platinum train action")
 
 def new_attack_continue():
-    coor_x = int(pyautogui.size().width * (1115/1920))
-    coor_y = int(pyautogui.size().height * (697/1080))
+    coor_x = config.new_attack_continue_coord[0]
+    coor_y = config.new_attack_continue_coord[1]
 
     mouse.move_click(coor_x, coor_y, "new attack continue")
 
 def close_train_page():
-    coor_x = int(pyautogui.size().width * (1381/1920))
-    coor_y = int(pyautogui.size().height * (177/1080))
+    coor_x = config.close_train_page_coord[0]
+    coor_y = config.close_train_page_coord[1]
 
     mouse.move_click(coor_x, coor_y, "close train page")
 
 
 def okay_evolve_miscrit():
-    coor_x = int(pyautogui.size().width * (962/1920))
-    coor_y = int(pyautogui.size().height * (843/1080))
+    coor_x = config.okay_evolve_miscrit_coord[0]
+    coor_y = config.okay_evolve_miscrit_coord[1]
 
     mouse.move_click(coor_x, coor_y, "okay evolve miscrit")
 
