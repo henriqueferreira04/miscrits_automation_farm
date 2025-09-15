@@ -4,33 +4,47 @@
 import pyautogui
 import time
 import random
+from pynput import mouse, keyboard
+from pynput.keyboard import Listener, Key
 
-# ==============================================================================
-#  STEP 1: FIND YOUR COORDINATES
-# ==============================================================================
+# Global variable to store the recorded coordinates
+recorded_coords = None
+
+# Function to handle key presses
+def on_press(key):
+    global recorded_coords
+    if key == Key.esc:
+        #print("\nCoordinate Finder cancelled.")
+        return False  # Stop the listener
+    elif hasattr(key, 'char') and key.char == '0':
+        #print(f"\nRecorded coordinates: {recorded_coords}")
+        return False  # Stop the listener
+
+# Function to display mouse coordinates
 def find_coordinates():
     """
     An interactive tool to display the current (X, Y) coordinates of the mouse.
+    Press '0' to record coordinates, 'ESC' to cancel and return None.
     """
-    print("--- Coordinate Finder Mode ---")
-    print("Move your mouse over the desired location on the screen.")
-    print("Press Ctrl+C in this terminal window to stop.")
-    
-    try:
-        while True:
-            # Get and display the current mouse position
-            x, y = pyautogui.position()
-            position_str = f"X: {str(x).rjust(4)}  Y: {str(y).rjust(4)}"
-            
-            # Print the line and use '\r' to overwrite it on the next loop
-            # This prevents spamming the console
-            print(position_str, end='\r')
-            time.sleep(0.1) # A short delay to prevent high CPU usage
-            
-    except KeyboardInterrupt:
-        print("\n\nCoordinate Finder stopped.")
-        print("Now, update the ATTACK_X and ATTACK_Y variables in the script.")
+    global recorded_coords
 
+    try:
+        with mouse.Listener(on_move=on_move) as mouse_listener, keyboard.Listener(on_press=on_press) as keyboard_listener:
+            # Wait for the keyboard listener to stop
+            keyboard_listener.join()
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    
+    return recorded_coords
+
+# Function to handle mouse movement
+def on_move(x, y):
+    global recorded_coords
+    recorded_coords = (int(x), int(y))
+    position_str = f"X: {str(x).rjust(4)}  Y: {str(y).rjust(4)}"
+    #print(position_str, end='\r')
 
 if __name__ == "__main__":
-    find_coordinates()
+    print(find_coordinates())

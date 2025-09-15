@@ -19,3 +19,6 @@ opencv-python>=4.8.0
 
 # Python Imaging Library for image manipulation
 Pillow>=10.0.0
+
+# GUI framework for creating desktop applications
+PySide6>=6.5.0
