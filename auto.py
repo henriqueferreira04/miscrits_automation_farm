@@ -14,6 +14,7 @@ import sys
 import numpy as np
 import pyautogui
 import cv2
+import os
 
 # Suppress PyTorch MPS warnings on Apple Silicon
 warnings.filterwarnings("ignore", message=".*pin_memory.*not supported on MPS.*", category=UserWarning)
@@ -22,7 +23,10 @@ global screenshot_count
 screenshot_count = 0  # Initialize screenshot counter
 
 def disable_print():
-    sys.stdout = open('/dev/null', 'w')
+    if os.name == 'nt':  # Windows
+        sys.stdout = open('nul', 'w')
+    else:  # macOS/Linux
+        sys.stdout = open('/dev/null', 'w')
 
 def enable_print():
     sys.stdout = sys.__stdout__
