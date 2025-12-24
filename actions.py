@@ -99,8 +99,8 @@ def perform_attack(attack_coordinates):
 
 
 def move_left_attack_page():
-    coor_x = config.move_left_attack_page_coord[0]
-    coor_y = config.move_left_attack_page_coord[1]
+    coor_x = config.move_right_attack_page_coord[0]
+    coor_y = config.move_right_attack_page_coord[1]
 
     mouse.move_click(coor_x, coor_y, "move left attack page")
 

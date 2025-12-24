@@ -20,8 +20,8 @@ def load_miscrits_data():
 # Load data at module import
 miscrits_dict_rarity, rarity_percentages = load_miscrits_data()
 
-exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks", "Shurikoon", "Vhisp"]
-capture_miscrits = ["Dark Breezycheeks"]
+exception_miscrits = ["Aebex", "Mistraxol", "Dark Breezycheeks", "Shurikoon", "Vhisp"] # List of miscrits that died with one hit
+capture_miscrits = ["Eclipso"]
 
 
 count = 0
@@ -39,7 +39,8 @@ def is_to_capture(text):
             miscrit_dict["rarity"] = rarity
             miscrit_dict["class"] = 0
 
-            with open("captured_miscrits.txt", "a") as file:  #save in file txt the miscrits name detected with the automation
+            with open("captured_miscrits.txt", "a") as file:
+                file.write(f"{miscrit_dict['name']} with rarity {miscrit_dict['rarity']}, \t")
                 count += 1
                 if count < 20:
                     file.write(f"{miscrit_dict['name']}, \t")

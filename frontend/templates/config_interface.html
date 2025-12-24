@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Miscrits Config Interface</title>
+    <style>
+                /* Modal styles */
+                .modal-bg {
+                    display: none;
+                    position: fixed;
+                    z-index: 10000;
+                    left: 0; top: 0; width: 100vw; height: 100vh;
+                    background: rgba(0,0,0,0.5);
+                    align-items: center; justify-content: center;
+                    pointer-events: all;
+                }
+                .modal-bg.active { display: flex; }
+                .modal-content {
+                    background: #fff;
+                    border-radius: 10px;
+                    padding: 32px 36px;
+                    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+                    max-width: 400px;
+                    text-align: center;
+                    position: relative;
+                }
+                .modal-content h3 { margin-top: 0; }
+                .spinner {
+                    margin: 18px auto 10px auto;
+                    width: 48px; height: 48px;
+                    border: 6px solid #eee;
+                    border-top: 6px solid #007bff;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .blurred {
+                    filter: blur(4px) grayscale(0.2);
+                    pointer-events: none !important;
+                    user-select: none !important;
+                }
+        body { font-family: Arial, sans-serif; background: #f7f7f7; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 32px; }
+        h2 { margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        tr:nth-child(even) { background: #fafafa; }
+        .btn { padding: 6px 16px; border: none; border-radius: 5px; background: #007bff; color: #fff; cursor: pointer; font-weight: 500; margin-right: 8px; }
+        .btn:disabled { background: #aaa; }
+        .img-preview { max-width: 180px; max-height: 120px; border: 1px solid #ddd; border-radius: 6px; margin-top: 8px; }
+        .flash { padding: 10px 18px; border-radius: 6px; margin-bottom: 18px; }
+        .flash-success { background: #e6ffe6; color: #1a7f1a; }
+        .flash-error { background: #ffe6e6; color: #a11a1a; }
+    </style>
+    <script>
+        function showImage(id) {
+            var img = document.getElementById('img-' + id);
+            if (img.style.display === 'block') {
+                img.style.display = 'none';
+            } else {
+                img.style.display = 'block';
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h2>Change Config Variables</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div id="modal-bg" class="modal-bg" tabindex="-1">
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <h3 id="modal-title">Change Variable</h3>
+            <div id="modal-var-name" style="font-weight:600; font-size:1.1em;"></div>
+            <div class="spinner"></div>
+            <div style="margin: 18px 0 8px 0; color:#444; font-size:1.08em;">
+                <b>Instructions:</b><br>
+                <span id="modal-instructions">
+                Change variable <span id="modal-var-key"></span>.<br>
+                <b>Move your mouse and press 0 to save coordinates, or Escape to cancel.</b><br>
+                The app is locked until you finish.<br>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="main-app">
+    <table>
+        <thead>
+        <tr>
+            <th>Variable</th>
+            <th>Coordinates</th>
+            <th>View</th>
+            <th>Change</th>
+        </tr>
+        </thead>
+        <tbody id="config-table-body">
+        {% for v in variables %}
+        <tr data-key="{{ v.key }}">
+            <td>{{ v.label }}</td>
+            <td class="coords-cell">({{ v.coords[0] }}, {{ v.coords[1] }})</td>
+            <td>
+                <button class="btn" type="button" onclick="showImage('{{ v.key }}')">View</button>
+                <div id="img-{{ v.key }}" style="display:none;">
+                    <img class="img-preview" src="{{ v.image }}" alt="{{ v.label }} image" onerror="this.style.display='none'" />
+                </div>
+            </td>
+            <td>
+                <form method="post" action="/move_click" style="display:inline;" onsubmit="return openModal('{{ v.label }}', this);">
+                    <input type="hidden" name="var_name" value="{{ v.key }}" />
+                    <button class="btn" type="submit">Change</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button id="save-btn" class="btn" style="background:gold;color:#333;display:none;margin-top:18px;" onclick="saveConfigChanges()">Save Changes</button>
+    </table>
+</div>
+
+<script>
+    // Track changed variables
+    let changedVars = new Set();
+    function markChanged(key, newCoords) {
+        const row = document.querySelector(`tr[data-key='${key}']`);
+        if (row) {
+            row.style.background = '#fffbe6'; // yellow highlight
+            row.querySelector('.coords-cell').textContent = newCoords;
+        }
+        changedVars.add(key);
+        document.getElementById('save-btn').style.display = 'inline-block';
+    }
+
+    // Patch openModal to mark changed row after successful change
+    function openModal(varName, form) {
+        document.getElementById('modal-var-name').innerText = varName;
+        document.getElementById('modal-var-key').innerText = varName;
+        var modal = document.getElementById('modal-bg');
+        modal.classList.add('active');
+        modal.focus();
+        document.getElementById('main-app').classList.add('blurred');
+        modalActive = true;
+        setTimeout(function() {
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                var match = html.match(/New coordinates for ([^:]+): ([^<]+)/);
+                if (match) {
+                    showSuccessModal(match[1], match[2]);
+                    // Find key from hidden input
+                    const key = form.querySelector('input[name="var_name"]').value;
+                    markChanged(key, match[2]);
+                } else {
+                    setTimeout(function() { window.location.href = '/'; }, 1200);
+                }
+            });
+        }, 100);
+        return false;
+    }
+
+    // Save changes to backend
+    function saveConfigChanges() {
+        if (changedVars.size === 0) return;
+        const changed = Array.from(changedVars).map(key => {
+            const row = document.querySelector(`tr[data-key='${key}']`);
+            const coords = row.querySelector('.coords-cell').textContent.replace(/[() ]/g, '').split(',');
+            return { key, coords };
+        });
+        fetch('/save_config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ changes: changed })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                changedVars.clear();
+                document.getElementById('save-btn').style.display = 'none';
+                // Optionally, show a flash message or reload
+                window.location.reload();
+            } else {
+                alert('Failed to save config: ' + (data.error || 'Unknown error'));
+            }
+        });
+    }
+    // Block all background interaction when modal is open
+    let modalActive = false;
+    function openModal(varName, form) {
+        document.getElementById('modal-var-name').innerText = varName;
+        document.getElementById('modal-var-key').innerText = varName;
+        var modal = document.getElementById('modal-bg');
+        modal.classList.add('active');
+        modal.focus();
+        document.getElementById('main-app').classList.add('blurred');
+        modalActive = true;
+        // Now send the backend request (AJAX) after modal is shown
+        setTimeout(function() {
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Try to extract new value from flash message in response
+                var match = html.match(/New coordinates for ([^:]+): ([^<]+)/);
+                if (match) {
+                    showSuccessModal(match[1], match[2]);
+                } else {
+                    setTimeout(function() { window.location.href = '/'; }, 1200);
+                }
+            });
+        }, 100); // slight delay to ensure modal is visible
+        return false; // Prevent default submit
+    }
+
+    function showSuccessModal(varName, coords) {
+        var modal = document.getElementById('modal-bg');
+        modal.innerHTML = `<div class="modal-content" role="dialog" aria-modal="true">
+            <h3>Variable Changed</h3>
+            <div style="font-weight:600; font-size:1.1em;">${varName}</div>
+            <div style="margin:18px 0 8px 0; color:#1a7f1a; font-size:1.15em;">New value: <b>${coords}</b></div>
+            <div class="spinner"></div>
+            <div style="margin: 18px 0 8px 0; color:#444; font-size:1.08em;">You have unsaved changes. Click <b>Save Changes</b> below to write to config.py.</div>
+        </div>`;
+        setTimeout(function() { closeModal(); }, 1200);
+    }
+    // Listen for Escape key to close modal
+    document.addEventListener('keydown', function(e) {
+        var modal = document.getElementById('modal-bg');
+        if (modal.classList.contains('active') && (e.key === 'Escape' || e.key === 'Esc')) {
+            closeModal();
+        }
+    });
+    function closeModal() {
+        var modal = document.getElementById('modal-bg');
+        modal.classList.remove('active');
+        document.getElementById('main-app').classList.remove('blurred');
+        modalActive = false;
+    }
+    // Prevent all pointer events and requests when modal is active
+    document.addEventListener('click', function(e) {
+        if (modalActive && !e.target.closest('.modal-content')) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, true);
+    document.addEventListener('submit', function(e) {
+        if (modalActive) {
+            e.preventDefault();
+        }
+    }, true);
+</script>
+</body>
+</html>

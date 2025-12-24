@@ -1,9 +1,7 @@
 # ==============================================================================
 #  STEP 1: FIND YOUR COORDINATES
 # ==============================================================================
-import pyautogui
-import time
-import random
+
 from pynput import mouse, keyboard
 from pynput.keyboard import Listener, Key
 

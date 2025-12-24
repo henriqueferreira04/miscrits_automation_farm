@@ -1,0 +1,22 @@
+[project]
+name = "miscrits_automation_farm"
+version = "0.1.0"
+description = "Automation scripts for Miscrits game"
+authors = [
+    { name = "henriqueferreira04" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+
+dependencies = [
+    "setuptools",
+    "wheel",
+    "pyautogui",
+    "easyocr",
+    "numpy",
+    "opencv-python",
+    "pillow",
+    "pyside6",
+    "flask",
+    "pynput"
+]

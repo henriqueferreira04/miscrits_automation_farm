@@ -38,11 +38,11 @@ def enable_print():
 if __name__ == '__main__':
     disable_print()  # Disable print statements for cleaner output
     reader = easyocr.Reader(['en']) # Specify English language
-    SPOT_IMAGES = ['images/wooly.png', 'images/wooly2.png']
+    SPOT_IMAGES = ['images/eclipso.png']
 
     is_miscrit2_to_train = True  # Set to True if you want to train miscrit 2
     is_miscrit3_to_train = True  # Set to True if you want to train miscrit 3
-    is_miscrit4_to_train = True  # Set to True if you want to train miscrit 4
+    is_miscrit4_to_train = False  # Set to True if you want to train miscrit 4
 
     is_miscrit2_plat = True  # Set to True if you want to use platinum training for miscrit 2
     is_miscrit3_plat = True  # Set to True if you want to use platinum training for miscrit 3
@@ -95,7 +95,7 @@ if __name__ == '__main__':
                         actions.perform_attack(config.first_attack)
                     elif capture_result == 2:
                         print("🟢⚔️ Capturable item detected! Proceeding with third attack...")
-                        actions.perform_attack(config.third_attack)
+                        actions.perform_attack(config.second_attack)
                     elif capture_result == 4:
                         print("🟢⚔️ Capturable item detected! Proceeding with forth attack...")
                         actions.perform_attack(config.forth_attack)

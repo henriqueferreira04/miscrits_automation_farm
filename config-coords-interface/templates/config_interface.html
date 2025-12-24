@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Miscrits Config Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --background-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f1f3f5;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        #save-btn {
+            background-color: var(--success-color);
+        }
+
+        .btn:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .img-preview {
+            max-width: 200px;
+            max-height: 150px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .flash {
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .flash-success {
+            background: #e9f7ef;
+            color: #155724;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .coords-cell.changed {
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        /* Modal styles */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-bg.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            max-width: 420px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .spinner {
+            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 6px solid #e9ecef;
+            border-top: 6px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .blurred {
+            filter: blur(5px);
+            transition: filter 0.2s ease;
+        }
+    </style>
+    <script>
+        function showImage(id) {
+            var img = document.getElementById('img-' + id);
+            if (img.style.display === 'block') {
+                img.style.display = 'none';
+            } else {
+                img.style.display = 'block';
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h2>Change Config Variables</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div id="modal-bg" class="modal-bg" tabindex="-1">
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <h3 id="modal-title">Change Variable</h3>
+            <div id="modal-var-name" style="font-weight:600; font-size:1.1em;"></div>
+            <div class="spinner"></div>
+            <div style="margin: 18px 0 8px 0; color:#444; font-size:1.08em;">
+                <b>Instructions:</b><br>
+                <span id="modal-instructions">
+                Change variable <span id="modal-var-key"></span>.<br>
+                <b>Move your mouse and press 0 to save coordinates, or Escape to cancel.</b><br>
+                The app is locked until you finish.<br>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="main-app">
+    <table>
+        <thead>
+        <tr>
+            <th>Variable</th>
+            <th>Description</th>
+            <th>Coordinates</th>
+            <th>View</th>
+            <th>Change</th>
+        </tr>
+        </thead>
+        <tbody id="config-table-body">
+        {% for v in variables %}
+        <tr data-key="{{ v.key }}">
+            <td>{{ v.label }}</td>
+            <td>{{ v.description }}</td>
+            <td class="coords-cell">({{ v.coords[0] }}, {{ v.coords[1] }})</td>
+            <td>
+                <button class="btn" type="button" onclick="showImage('{{ v.key }}')">View</button>
+                <div id="img-{{ v.key }}" style="display:none;">
+                    <img class="img-preview" src="{{ v.image }}" alt="{{ v.label }} image" onerror="this.style.display='none'" />
+                </div>
+            </td>
+            <td>
+                <form method="post" action="/move_click" style="display:inline;" onsubmit="return openModal('{{ v.label }}', this);">
+                    <input type="hidden" name="var_name" value="{{ v.key }}" />
+                    <button class="btn" type="submit">Change</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button id="save-btn" class="btn" onclick="saveConfigChanges()">Save Changes</button>
+</div>
+
+<script>
+    // Track changed variables
+    let changedVars = new Set();
+    function markChanged(key, newCoords) {
+        const row = document.querySelector(`tr[data-key='${key}']`);
+        if (row) {
+            const cell = row.querySelector('.coords-cell');
+            cell.textContent = newCoords;
+            cell.classList.add('changed');
+        }
+        changedVars.add(key);
+        document.getElementById('save-btn').style.display = 'inline-block';
+    }
+
+    // Patch openModal to mark changed row after successful change
+    function openModal(varName, form) {
+        document.getElementById('modal-var-name').innerText = varName;
+        document.getElementById('modal-var-key').innerText = varName;
+        var modal = document.getElementById('modal-bg');
+        modal.classList.add('active');
+        modal.focus();
+        document.getElementById('main-app').classList.add('blurred');
+        modalActive = true;
+        setTimeout(function() {
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const key = form.querySelector('input[name="var_name"]').value;
+                    const newCoords = `(${data.coords[0]}, ${data.coords[1]})`;
+                    markChanged(key, newCoords);
+                    showSuccessModal(data.var_name, newCoords);
+                } else {
+                    alert('Failed to get new coordinates: ' + (data.error || 'Unknown error'));
+                    closeModal();
+                }
+            });
+        }, 100);
+        return false;
+    }
+
+    // Save changes to backend
+    function saveConfigChanges() {
+        if (changedVars.size === 0) return;
+        const changed = Array.from(changedVars).map(key => {
+            const row = document.querySelector(`tr[data-key='${key}']`);
+            const coords = row.querySelector('.coords-cell').textContent.replace(/[() ]/g, '').split(',');
+            return { key, coords };
+        });
+        fetch('/save_config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ changes: changed })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                changedVars.clear();
+                document.getElementById('save-btn').style.display = 'none';
+                // Optionally, show a flash message or reload
+                window.location.reload();
+            } else {
+                alert('Failed to save config: ' + (data.error || 'Unknown error'));
+            }
+        });
+    }
+    // Block all background interaction when modal is open
+    let modalActive = false;
+
+
+    function showSuccessModal(varName, coords) {
+        var modal = document.getElementById('modal-bg');
+        modal.innerHTML = `<div class="modal-content" role="dialog" aria-modal="true">
+            <h3>Variable Changed</h3>
+            <div style="font-weight:600; font-size:1.1em;">${varName}</div>
+            <div style="margin:18px 0 8px 0; color:#1a7f1a; font-size:1.15em;">New value: <b>${coords}</b></div>
+            <div class="spinner"></div>
+            <div style="margin: 18px 0 8px 0; color:#444; font-size:1.08em;">You have unsaved changes. Click <b>Save Changes</b> below to write to config.py.</div>
+        </div>`;
+        setTimeout(function() { closeModal(); }, 1200);
+    }
+    // Listen for Escape key to close modal
+    document.addEventListener('keydown', function(e) {
+        var modal = document.getElementById('modal-bg');
+        if (modal.classList.contains('active') && (e.key === 'Escape' || e.key === 'Esc')) {
+            closeModal();
+        }
+    });
+    function closeModal() {
+        var modal = document.getElementById('modal-bg');
+        modal.classList.remove('active');
+        document.getElementById('main-app').classList.remove('blurred');
+        modalActive = false;
+    }
+    // Prevent all pointer events and requests when modal is active
+    document.addEventListener('click', function(e) {
+        if (modalActive && !e.target.closest('.modal-content')) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, true);
+    document.addEventListener('submit', function(e) {
+        if (modalActive) {
+            e.preventDefault();
+        }
+    }, true);
+</script>
+</body>
+</html>
